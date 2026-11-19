@@ -319,6 +319,24 @@
 .fav-verse{padding:12px 0;border-bottom:1px solid var(--line,rgba(0,0,0,.08))}
 .fav-verse p{margin:0 0 6px;font-family:'Bodoni Moda',serif;font-style:italic;font-size:17px;line-height:1.35}
 .fav-verse span{font-family:'Space Mono',monospace;font-size:11px;text-transform:uppercase;color:var(--muted)}
+
+.voice-bar{display:flex;align-items:center;gap:14px;width:100%;margin:14px 0 10px;padding:14px 16px;background:var(--orange);color:#fff;border:0;border-radius:0;text-align:left;clip-path:polygon(0 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%)}
+.voice-bar span{flex:1;display:flex;flex-direction:column;gap:2px}
+.voice-bar b{font-family:'Bodoni Moda',serif;font-style:italic;font-size:20px;font-weight:600}
+.voice-bar i{font-style:normal;font-family:'Space Mono',monospace;font-size:11px;opacity:.85}
+.smart{display:flex;flex-direction:column;align-items:stretch}
+.mic-big{align-self:center;width:92px;height:92px;border-radius:50%;border:0;background:var(--blue);color:#fff;display:grid;place-items:center;margin:4px 0 8px;box-shadow:0 8px 24px rgba(18,52,217,.3);transition:transform .15s}
+.mic-big.on{background:var(--orange);animation:micPulse 1.2s ease-in-out infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,101,0,.45)}50%{box-shadow:0 0 0 18px rgba(255,101,0,0)}}
+.mic-hint{text-align:center;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.smart-prev{border:1.5px dashed var(--muted);padding:14px;margin:4px 0 14px;min-height:70px}
+.smart-prev .empty{font-size:14px;line-height:1.5;color:var(--muted)}
+.sp-kind{display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:6px}
+.sp-title{font-family:'Bodoni Moda',serif;font-size:24px;line-height:1.2;margin-bottom:8px}
+.sp-meta{display:flex;flex-wrap:wrap;gap:6px}
+.sp-meta span{font-size:13px;padding:4px 9px;background:rgba(0,0,0,.05);border-radius:0}
+[data-theme=dark] .sp-meta span{background:rgba(255,255,255,.08)}
+.btn[disabled]{opacity:.4;pointer-events:none}
 </style>
 </head>
 <body>
@@ -344,7 +362,7 @@
 
 <script>
 /* ===================== Ikone (Lucide) ===================== */
-const LUCIDE = {"house": "<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" /><path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" />", "calendar-days": "<path d=\"M8 2v3\" /><path d=\"M16 2v3\" /><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" /><path d=\"M3 9h18\" /><path d=\"M8 13h.01\" /><path d=\"M12 13h.01\" /><path d=\"M16 13h.01\" /><path d=\"M8 17h.01\" /><path d=\"M12 17h.01\" /><path d=\"M16 17h.01\" />", "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" /><path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />", "graduation-cap": "<path d=\"M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z\" /><path d=\"M22 10v6\" /><path d=\"M6 12.5V16a6 3 0 0 0 12 0v-3.5\" />", "folder-kanban": "<path d=\"M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z\" /><path d=\"M8 10v4\" /><path d=\"M12 10v2\" /><path d=\"M16 10v6\" />", "arrow-up-right": "<path d=\"M7 7h10v10\" /><path d=\"M7 17 17 7\" />", "eye": "<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /><circle cx=\"12\" cy=\"12\" r=\"3\" />", "eye-off": "<path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\" /><path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\" /><path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\" /><path d=\"m2 2 20 20\" />", "timer": "<line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\" /><line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\" /><circle cx=\"12\" cy=\"14\" r=\"8\" />", "settings-2": "<path d=\"M14 17H5\" /><path d=\"M19 7h-9\" /><circle cx=\"17\" cy=\"17\" r=\"3\" /><circle cx=\"7\" cy=\"7\" r=\"3\" />", "chevron-left": "<path d=\"m15 18-6-6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "plus": "<path d=\"M5 12h14\" /><path d=\"M12 5v14\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /><path d=\"M9 18h6\" /><path d=\"M10 22h4\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /><path d=\"m15 5 4 4\" />", "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />", "repeat": "<path d=\"m17 2 4 4-4 4\" /><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" /><path d=\"m7 22-4-4 4-4\" /><path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />", "dumbbell": "<path d=\"M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z\" /><path d=\"m2.5 21.5 1.4-1.4\" /><path d=\"m20.1 3.9 1.4-1.4\" /><path d=\"M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z\" /><path d=\"m9.6 14.4 4.8-4.8\" />", "cake": "<path d=\"M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8\" /><path d=\"M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1\" /><path d=\"M2 21h20\" /><path d=\"M7 8v3\" /><path d=\"M12 8v3\" /><path d=\"M17 8v3\" /><path d=\"M7 4h.01\" /><path d=\"M12 4h.01\" /><path d=\"M17 4h.01\" />", "play": "<path d=\"M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z\" />", "pause": "<rect x=\"14\" y=\"3\" width=\"5\" height=\"18\" rx=\"1\" /><rect x=\"5\" y=\"3\" width=\"5\" height=\"18\" rx=\"1\" />", "square": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" />", "skip-forward": "<path d=\"M21 4v16\" /><path d=\"M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z\" />", "music": "<path d=\"M21 16V3a1 1 0 0 0-1.28-.96l-10 2.917a1 1 0 0 0-.72.96V19\" /><circle cx=\"18\" cy=\"16\" r=\"3\" /><circle cx=\"6\" cy=\"19\" r=\"3\" />", "piggy-bank": "<path d=\"M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z\" /><path d=\"M16 10h.01\" /><path d=\"M2 8v1a2 2 0 0 0 2 2h1\" />", "landmark": "<path d=\"M10 18v-7\" /><path d=\"M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z\" /><path d=\"M14 18v-7\" /><path d=\"M18 18v-7\" /><path d=\"M3 22h18\" /><path d=\"M6 18v-7\" />", "arrow-left-right": "<path d=\"M8 3 4 7l4 4\" /><path d=\"M4 7h16\" /><path d=\"m16 21 4-4-4-4\" /><path d=\"M20 17H4\" />", "trending-down": "<path d=\"M16 17h6v-6\" /><path d=\"m22 17-8.5-8.5-5 5L2 7\" />", "target": "<circle cx=\"12\" cy=\"12\" r=\"10\" /><circle cx=\"12\" cy=\"12\" r=\"6\" /><circle cx=\"12\" cy=\"12\" r=\"2\" />", "sparkles": "<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\" /><path d=\"M20 2v4\" /><path d=\"M22 4h-4\" /><circle cx=\"4\" cy=\"20\" r=\"2\" />", "book-open": "<path d=\"M12 5v16\" /><path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "arrow-right": "<path d=\"M5 12h14\" /><path d=\"m12 5 7 7-7 7\" />", "x": "<path d=\"M18 6 6 18\" /><path d=\"m6 6 12 12\" />", "heart": "<path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\" />", "refresh-cw": "<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\" /> <path d=\"M21 3v5h-5\" /> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\" /> <path d=\"M8 16H3v5\" />"};
+const LUCIDE = {"house": "<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\" /><path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\" />", "calendar-days": "<path d=\"M8 2v3\" /><path d=\"M16 2v3\" /><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\" /><path d=\"M3 9h18\" /><path d=\"M8 13h.01\" /><path d=\"M12 13h.01\" /><path d=\"M16 13h.01\" /><path d=\"M8 17h.01\" /><path d=\"M12 17h.01\" /><path d=\"M16 17h.01\" />", "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" /><path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />", "graduation-cap": "<path d=\"M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z\" /><path d=\"M22 10v6\" /><path d=\"M6 12.5V16a6 3 0 0 0 12 0v-3.5\" />", "folder-kanban": "<path d=\"M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z\" /><path d=\"M8 10v4\" /><path d=\"M12 10v2\" /><path d=\"M16 10v6\" />", "arrow-up-right": "<path d=\"M7 7h10v10\" /><path d=\"M7 17 17 7\" />", "eye": "<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /><circle cx=\"12\" cy=\"12\" r=\"3\" />", "eye-off": "<path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\" /><path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\" /><path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\" /><path d=\"m2 2 20 20\" />", "timer": "<line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\" /><line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\" /><circle cx=\"12\" cy=\"14\" r=\"8\" />", "settings-2": "<path d=\"M14 17H5\" /><path d=\"M19 7h-9\" /><circle cx=\"17\" cy=\"17\" r=\"3\" /><circle cx=\"7\" cy=\"7\" r=\"3\" />", "chevron-left": "<path d=\"m15 18-6-6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "plus": "<path d=\"M5 12h14\" /><path d=\"M12 5v14\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /><path d=\"M9 18h6\" /><path d=\"M10 22h4\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /><path d=\"m15 5 4 4\" />", "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />", "repeat": "<path d=\"m17 2 4 4-4 4\" /><path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" /><path d=\"m7 22-4-4 4-4\" /><path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />", "dumbbell": "<path d=\"M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z\" /><path d=\"m2.5 21.5 1.4-1.4\" /><path d=\"m20.1 3.9 1.4-1.4\" /><path d=\"M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z\" /><path d=\"m9.6 14.4 4.8-4.8\" />", "cake": "<path d=\"M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8\" /><path d=\"M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1\" /><path d=\"M2 21h20\" /><path d=\"M7 8v3\" /><path d=\"M12 8v3\" /><path d=\"M17 8v3\" /><path d=\"M7 4h.01\" /><path d=\"M12 4h.01\" /><path d=\"M17 4h.01\" />", "play": "<path d=\"M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z\" />", "pause": "<rect x=\"14\" y=\"3\" width=\"5\" height=\"18\" rx=\"1\" /><rect x=\"5\" y=\"3\" width=\"5\" height=\"18\" rx=\"1\" />", "square": "<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" />", "skip-forward": "<path d=\"M21 4v16\" /><path d=\"M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z\" />", "music": "<path d=\"M21 16V3a1 1 0 0 0-1.28-.96l-10 2.917a1 1 0 0 0-.72.96V19\" /><circle cx=\"18\" cy=\"16\" r=\"3\" /><circle cx=\"6\" cy=\"19\" r=\"3\" />", "piggy-bank": "<path d=\"M11 17h3v2a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a3.16 3.16 0 0 0 2-2h1a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-1a5 5 0 0 0-2-4V3a4 4 0 0 0-3.2 1.6l-.3.4H11a6 6 0 0 0-6 6v1a5 5 0 0 0 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1z\" /><path d=\"M16 10h.01\" /><path d=\"M2 8v1a2 2 0 0 0 2 2h1\" />", "landmark": "<path d=\"M10 18v-7\" /><path d=\"M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z\" /><path d=\"M14 18v-7\" /><path d=\"M18 18v-7\" /><path d=\"M3 22h18\" /><path d=\"M6 18v-7\" />", "arrow-left-right": "<path d=\"M8 3 4 7l4 4\" /><path d=\"M4 7h16\" /><path d=\"m16 21 4-4-4-4\" /><path d=\"M20 17H4\" />", "trending-down": "<path d=\"M16 17h6v-6\" /><path d=\"m22 17-8.5-8.5-5 5L2 7\" />", "target": "<circle cx=\"12\" cy=\"12\" r=\"10\" /><circle cx=\"12\" cy=\"12\" r=\"6\" /><circle cx=\"12\" cy=\"12\" r=\"2\" />", "sparkles": "<path d=\"M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z\" /><path d=\"M20 2v4\" /><path d=\"M22 4h-4\" /><circle cx=\"4\" cy=\"20\" r=\"2\" />", "book-open": "<path d=\"M12 5v16\" /><path d=\"M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z\" />", "arrow-right": "<path d=\"M5 12h14\" /><path d=\"m12 5 7 7-7 7\" />", "x": "<path d=\"M18 6 6 18\" /><path d=\"m6 6 12 12\" />", "heart": "<path d=\"M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5\" />", "refresh-cw": "<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\" /> <path d=\"M21 3v5h-5\" /> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\" /> <path d=\"M8 16H3v5\" />", "mic": "<path d=\"M12 19v3\" /> <path d=\"M19 10v2a7 7 0 0 1-14 0v-2\" /> <rect x=\"9\" y=\"2\" width=\"6\" height=\"13\" rx=\"3\" />"};
 const ICON_ALIAS = { home: 'house', cal: 'calendar-days', fin: 'wallet', faks: 'graduation-cap', proj: 'folder-kanban', gear: 'settings-2', back: 'chevron-left', left: 'chevron-left', right: 'chevron-right', bulb: 'lightbulb' };
 const icon = (n, s = 22, w = 1.8) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${LUCIDE[ICON_ALIAS[n] || n] || ''}</svg>`;
 
@@ -639,6 +657,8 @@ function renderHome() {
       </div>` : ''}
     </button>
 
+    <button class="voice-bar" id="q-voice">${icon('mic', 22, 1.8)}<span><b>Reci ili upiši</b><i>„sutra u 18 trening” · „kava 3,50 €”</i></span>${icon('arrow-up-right', 18, 1.6)}</button>
+
     ${verseHtml()}
 
     <div class="bento">
@@ -693,6 +713,7 @@ function renderHome() {
   bindEventRows();
   bindPlayer();
   bindVerse();
+  document.getElementById('q-voice').onclick = openSmartSheet;
   document.getElementById('q-ev').onclick = () => openEventSheet(null, { date: today });
   document.getElementById('q-mo').onclick = () => openMomentSheet();
   document.getElementById('q-tx').onclick = () => openTxSheet();
@@ -1074,6 +1095,230 @@ function openEventSheet(existing, preset = {}) {
     if (!confirm(isRec(existing) ? 'Obrisati ovu obavezu i sva njena ponavljanja?' : 'Obrisati ovu obavezu?')) return;
     state.events = state.events.filter(x => x.id !== existing.id); save(); closeSheet(); render(); toast('Obrisano');
   };
+}
+
+
+/* ===================== PAMETNI UNOS (glas / tekst) ===================== */
+const KEY_MAP = { 'č': 'C', 'ć': 'K', 'đ': 'D', 'š': 'S', 'ž': 'Z' };
+const KEY_BACK = { C: 'č', K: 'ć', D: 'đ', S: 'š', Z: 'ž' };
+const toKey = s => s.replace(/[čćđšž]/g, c => KEY_MAP[c]);
+const fromKey = s => s.replace(/[CKDSZ]/g, c => KEY_BACK[c]);
+const NUM_WORDS = { nula: 0, jedan: 1, jedna: 1, jednu: 1, jedno: 1, dva: 2, dvije: 2, tri: 3, Cetiri: 4, pet: 5, Sest: 6, sedam: 7, osam: 8, devet: 9, deset: 10,
+  jedanaest: 11, dvanaest: 12, trinaest: 13, Cetrnaest: 14, petnaest: 15, Sesnaest: 16, sedamnaest: 17, osamnaest: 18, devetnaest: 19, dvadeset: 20,
+  trideset: 30, Cetrdeset: 40, pedeset: 50, Sezdeset: 60, sedamdeset: 70, osamdeset: 80, devedeset: 90, sto: 100, stotinu: 100 };
+const WD_STEMS = ['ponedjelj', 'utor', 'srijed', 'Cetvrt', 'petak', 'subot', 'nedjelj']; // 0 = pon
+const MONTH_STEMS = ['sijeC', 'veljaC', 'oZuj', 'trav', 'svib', 'lip', 'srp', 'kolovoz', 'ruj', 'listopad', 'studen', 'prosin'];
+const TX_KEYWORDS = [
+  ['hrana', /\b(kav[aeu]|kafiK|ruCak|ruCk|doruCak|veCer[au]|hran[aeu]|konzum|lidl|spar|kaufland|plodine|tommy|studenac|pekar|burek|pizz|duKan|namirnic|market|piKa?)\b/],
+  ['prijevoz', /\b(goriv|benzin|dizel|bus|autobus|tramvaj|zet|taksi|uber|bolt|parking|vlak|cestarin|karta za)/],
+  ['stan', /\b(najam|najamnin|stanarin|struj|reZij|vod[aeu]|plin|internet|hep|stan\b)/],
+  ['pretplate', /\b(netflix|spotify|youtube|hbo|disney|max|pretplat|icloud|chatgpt|claude)/],
+  ['izlasci', /\b(izlaz|izlask|bar\b|klub|kino|restoran|koktel|pivo|piv[ao]|caffe bar)/],
+  ['faks', /\b(faks|Skolarin|knjig|skript|teCaj|udZbenik|ispit)/],
+  ['otplata', /\b(rat[aeu]|kredit|otplat|minus)/],
+  ['kupovina', /\b(odjeK|zara|h&m|kupil|kupio|cipel|tenisic|kozmetik|dm\b|müller|muller|poklon)/],
+];
+const INCOME_RE = /\b(plaKa|plaKu|plaKe|primila|dobila|uplatili|uplata|uplatio|honorar|freelance|klijent|zaradila|povrat)\b/;
+const EVENT_CAT_RE = [
+  ['trening', /\b(trening|teretan|gym|utezanj|pilates|joga|yoga|trCanj)/],
+  ['rodjendan', /\b(roDendan|rodjendan)/],
+  ['faks', /\b(faks|predavanj|ispit|kolokvij|kolok|vjeZb[ae]|seminar|rok|zadaK|projekt za faks)/],
+  ['posao', /\b(posao|poslu|sastan|meeting|Sef|direktor|inventur)/],
+];
+
+function vNormalize(s) {
+  return ' ' + s.replace(/[“”„"!?]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+}
+
+function wordsToDigits(s) {
+  // "dvadeset pet" -> 25, "tri" -> 3 (samo kad stoji kao zasebna rijeC)
+  return s.replace(/\b(dvadeset|trideset|Cetrdeset|pedeset|Sezdeset|sedamdeset|osamdeset|devedeset)(?: i)? (jedan|jedna|dva|dvije|tri|Cetiri|pet|Sest|sedam|osam|devet)\b/g,
+    (m, a, b) => String(NUM_WORDS[a] + NUM_WORDS[b]))
+    .replace(/\b(nula|jedan|jedna|jednu|dva|dvije|tri|Cetiri|pet|Sest|sedam|osam|devet|deset|jedanaest|dvanaest|trinaest|Cetrnaest|petnaest|Sesnaest|sedamnaest|osamnaest|devetnaest|dvadeset|trideset|Cetrdeset|pedeset|Sezdeset|sedamdeset|osamdeset|devedeset|sto|stotinu)\b/g,
+      (m) => String(NUM_WORDS[m]));
+}
+
+function parseSmart(input) {
+  const raw = input.trim();
+  if (!raw) return null;
+  let s = vNormalize(wordsToDigits(toKey(raw.toLowerCase())));
+  const today = todayStr();
+  const res = { kind: 'event', title: '', date: null, time: '', cat: 'osobno', repeat: 'none', days: [], amount: null, txType: 'out', txCat: 'ostalo', acc: 'tekuci', text: raw };
+  const strip = re => { s = s.replace(re, ' '); };
+
+  // --- ideja
+  const ideaM = s.match(/^\s*(?:zapiSi |nova |brza )?ideja:?\s+(.*)$/) || s.match(/^\s*(?:zapiSi |dodaj )?ideju:?\s+(.*)$/);
+  if (ideaM) { res.kind = 'idea'; res.text = fromKey(ideaM[1].trim()); res.text = res.text.charAt(0).toUpperCase() + res.text.slice(1); return res; }
+
+  // --- iznos (novac)
+  let amount = null;
+  const am = s.match(/(\d+(?:[.,]\d{1,2})?)\s*(?:€|eur\b|eura\b|euro\b|eure\b|e\b)(?:\s*(?:i\s*)?(\d{1,2})\s*(?:centi|cent|c)\b)?/);
+  if (am) { amount = parseFloat(am[1].replace(',', '.')) + (am[2] ? +am[2] / 100 : 0); strip(am[0]); }
+  else {
+    const am2 = s.match(/\b(?:potroSila|potroSio|platila|platio|dala|dao|primila|dobila|zaradila|uplata)\s+(?:sam\s+)?(\d+(?:[.,]\d{1,2})?)\b/);
+    if (am2) { amount = parseFloat(am2[1].replace(',', '.')); s = s.replace(am2[1], ' '); }
+  }
+  if (amount !== null && amount > 0) {
+    res.kind = 'tx'; res.amount = Math.round(amount * 100) / 100;
+    if (INCOME_RE.test(s)) { res.txType = 'in'; res.txCat = /freelance|klijent|honorar/.test(s) ? 'freelance' : /plaK/.test(s) ? 'placa' : 'ostalo-in'; }
+    else { const k = TX_KEYWORDS.find(([, re]) => re.test(s)); res.txCat = k ? k[0] : 'ostalo'; }
+    if (/Stedn|Stednj/.test(s)) res.acc = 'stedni';
+  }
+
+  // --- ponavljanje "svaki ponedjeljak i srijedu"
+  const every = s.match(/\bsvak(?:i|u|e|og)\s+((?:\w+(?:,|\s+i\s+|\s+)?)+)/);
+  if (every && res.kind === 'event') {
+    const days = [];
+    WD_STEMS.forEach((st, i) => { if (new RegExp('\\b' + st).test(every[1])) days.push(i); });
+    if (days.length) { res.repeat = 'weekly'; res.days = days; strip(/\bsvak(?:i|u|e|og)\b/); WD_STEMS.forEach(st => strip(new RegExp('\\b' + st + '\\w*\\b', 'g'))); strip(/\b(i|,)\b(?=\s*$)/); }
+    if (/\bsvak(?:i|e) godin|godiSnje/.test(s)) { res.repeat = 'yearly'; strip(/\bsvak(?:i|e) godin\w*|godiSnje/); }
+  }
+
+  // --- datum
+  let date = null;
+  const rel = [[/\bprekosutra\b/, 2], [/\bsutra\b/, 1], [/\bdanas\b/, 0], [/\bjuCer\b/, -1], [/\bprekjuCer\b/, -2]];
+  for (const [re, n] of rel) if (re.test(s)) { date = addDays(today, n); strip(re); break; }
+  if (!date) {
+    const za = s.match(/\bza (\d+) (dan|dana|tjedan|tjedna|tjedana)\b/);
+    if (za) { date = addDays(today, /tjed/.test(za[2]) ? +za[1] * 7 : +za[1]); strip(za[0]); }
+  }
+  if (!date && /\b(iduKi|sljedeKi) tjedan\b/.test(s) && !WD_STEMS.some(st => new RegExp('\\b' + st).test(s))) { date = addDays(today, 7 - wdIdx(today)); strip(/\b(iduKi|sljedeKi) tjedan\b/); }
+  if (!date) {
+    const dm = s.match(/\b(\d{1,2})\.\s*(\d{1,2})\.(?:\s*(\d{4})\.?)?/);
+    const dn = s.match(/\b(\d{1,2})\.?\s+(sijeC\w*|veljaC\w*|oZuj\w*|trav\w*|svib\w*|lip\w*|srp\w*|kolovoz\w*|ruj\w*|listopad\w*|studen\w*|prosin\w*)(?:\s+(\d{4}))?/);
+    let d = null, m = null, y = null, tok = null;
+    if (dm) { d = +dm[1]; m = +dm[2] - 1; y = dm[3] ? +dm[3] : null; tok = dm[0]; }
+    else if (dn) { d = +dn[1]; m = MONTH_STEMS.findIndex(st => dn[2].startsWith(st)); y = dn[3] ? +dn[3] : null; tok = dn[0]; }
+    if (tok && d >= 1 && d <= 31 && m >= 0 && m <= 11) {
+      const t = parseYmd(today); let yy = y || t.getFullYear();
+      let cand = ymd(new Date(yy, m, d));
+      if (!y && cand < today && res.kind !== 'tx') cand = ymd(new Date(yy + 1, m, d));
+      date = cand; strip(tok);
+    }
+  }
+  if (!date && res.repeat !== 'weekly') {
+    const wi = WD_STEMS.findIndex(st => new RegExp('\\b' + st).test(s));
+    if (wi >= 0) {
+      const cur = wdIdx(today);
+      let diff = (wi - cur + 7) % 7;
+      if (res.kind === 'tx') diff = diff === 0 ? 0 : diff - 7; // troSak "u petak" = proSli petak
+      else { if (diff === 0) diff = 7; if (/\b(iduKi|sljedeKi)\b/.test(s) && diff < 7) diff += 0; }
+      date = addDays(today, diff);
+      strip(new RegExp('\\b(u|na|ovaj|ovu|ovog|iduKi|iduKu|sljedeKi|sljedeKu)?\\s*' + WD_STEMS[wi] + '\\w*', 'g'));
+    }
+  }
+
+  // --- vrijeme
+  if (res.kind === 'event') {
+    let h = null, mi = 0, tm;
+    if ((tm = s.match(/\b(?:u\s+)?pola\s+(\d{1,2})\b/))) { h = +tm[1] - 1; mi = 30; }
+    else if ((tm = s.match(/\b(?:u|od|oko)\s+(\d{1,2})(?:[:.](\d{2})|\s*h\b|\s+sati\b|\s+i\s+(\d{1,2})\b)?/))) { h = +tm[1]; mi = +(tm[2] || tm[3] || 0); }
+    else if ((tm = s.match(/\b(\d{1,2})[:.](\d{2})\b/)) || (tm = s.match(/\b(\d{1,2})\s*h\b/))) { h = +tm[1]; mi = +(tm[2] || 0); }
+    if (h !== null && h <= 24 && mi < 60) {
+      const pm = /\b(popodne|poslijepodne|naveCer|uveCer|navecer)\b/.test(s);
+      if (pm && h < 12) h += 12;
+      if (!pm && !/\bujutro\b/.test(s) && h >= 1 && h <= 6 && !tm[0].includes(':')) h += 12; // "u 5" je najCeSKe 17h
+      res.time = `${pad(h % 24)}:${pad(mi)}`;
+      strip(tm[0]); strip(/\b(popodne|poslijepodne|naveCer|uveCer|ujutro|sati|h)\b/g);
+    }
+  }
+
+  res.date = date || (res.repeat === 'weekly' ? (() => { const cur = wdIdx(today); const first = res.days.map(d => (d - cur + 7) % 7).sort((a, b) => a - b)[0]; return addDays(today, first); })() : today);
+
+  // --- kategorija obaveze
+  if (res.kind === 'event') {
+    const c = EVENT_CAT_RE.find(([, re]) => re.test(s));
+    if (c) res.cat = c[0];
+    if (res.cat === 'rodjendan') res.repeat = 'yearly';
+  }
+
+  // --- naslov / opis
+  let t = s
+    .replace(/\b(dodaj|upiSi|zapiSi|stavi|podsjeti me|podsjetnik|obaveza|imam|trebam|moram|potroSila sam|potroSio sam|potroSila|potroSio|platila sam|platio sam|platila|platio|primila sam|dobila sam|kupila sam|kupio sam|kupila|kupio|sa Stednog|sa Stednje|sa tekuKeg|na|za|u|sam|je|mi)\b/g, ' ')
+    .replace(/\b(troSak|prihod)\b/g, ' ')
+    .replace(/[,.:;]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (res.kind === 'event' && res.cat === 'rodjendan') t = t.replace(/\b(roDendan|rodjendan)\b/, '').replace(/\s+/g, ' ').trim().replace(/^od\s+/, '');
+  t = t.replace(/^(i|s|sa|od|iz|te)\s+/, '').replace(/\s+(i|s|sa|te)$/, '').trim();
+  t = fromKey(t);
+  const caps = {}; raw.split(/[\s,.:;!?]+/).forEach(w => { if (/[A-ZČĆĐŠŽ]/.test(w)) caps[w.toLowerCase()] = w; });
+  t = t.split(' ').map(w => caps[w] || w).join(' ');
+  t = t.charAt(0).toUpperCase() + t.slice(1);
+  if (res.kind === 'tx') res.title = t;
+  else if (res.cat === 'trening' && (!t || /^(trening|teretana|gym|utezanje)$/i.test(t))) res.title = 'Trening';
+  else res.title = t;
+  return res;
+}
+
+function smartPreview(r) {
+  if (!r) return `<div class="empty">Reci ili upiši npr. <b>„sutra u 18 trening”</b>, <b>„kava 3,50 eura”</b>, <b>„svaki ponedjeljak i srijedu u 7 teretana”</b>, <b>„rođendan Ana 12. prosinca”</b> ili <b>„ideja: vez na trapericama”</b>.</div>`;
+  if (r.kind === 'idea') return `<div class="sp-kind">${icon('lightbulb', 16)} Ideja</div><div class="sp-title">${esc(r.text)}</div>`;
+  if (r.kind === 'tx') {
+    const cats = r.txType === 'in' ? INCOME_CATS : EXPENSE_CATS; const c = cats.find(x => x.id === r.txCat) || cats[cats.length - 1];
+    return `<div class="sp-kind">${icon('wallet', 16)} ${r.txType === 'in' ? 'Prihod' : 'Trošak'}</div>
+      <div class="sp-title">${money(r.amount)}</div>
+      <div class="sp-meta"><span>${c.ico} ${c.name}</span><span>${niceDate(r.date)}</span><span>${r.acc === 'stedni' ? 'Štedni' : 'Tekući'}</span>${r.title ? `<span>${esc(r.title)}</span>` : ''}</div>`;
+  }
+  const c = EVENT_CATS.find(x => x.id === r.cat);
+  const rep = r.repeat === 'weekly' ? 'svaki ' + r.days.map(d => DAYS[(d + 1) % 7]).join(', ') : r.repeat === 'yearly' ? 'svake godine' : niceDate(r.date);
+  return `<div class="sp-kind">${icon('calendar-days', 16)} Obaveza</div>
+    <div class="sp-title">${esc(r.title || 'Bez naziva')}</div>
+    <div class="sp-meta"><span style="color:${c.color}">● ${c.name}</span><span>${rep}</span>${r.time ? `<span>${r.time}</span>` : ''}</div>`;
+}
+
+function saveSmart(r) {
+  if (r.kind === 'idea') { const i = { id: uid(), text: r.text, date: todayStr() }; state.inbox.push(i); return { type: 'idea', item: i }; }
+  if (r.kind === 'tx') {
+    const t = { id: uid(), created: Date.now(), type: r.txType, amount: r.amount, cat: r.txCat, acc: r.acc, date: r.date, note: r.title };
+    state.tx.push(t); return { type: 'tx', item: t };
+  }
+  const e = { id: uid(), done: false, doneDates: [], title: r.title || 'Obaveza', date: r.date, time: r.time, cat: r.cat, note: '', subjectId: '', repeat: r.repeat, days: r.repeat === 'weekly' ? r.days : [] };
+  state.events.push(e); return { type: 'event', item: e };
+}
+
+let recog = null;
+function openSmartSheet() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  openSheet('Reci ili upiši', `
+    <div class="smart">
+      <button class="mic-big" id="micBtn" aria-label="Govori">${icon('mic', 34, 1.8)}</button>
+      <div class="mic-hint" id="micHint">${SR ? 'Dodirni mikrofon i reci' : 'Dodirni polje i stisni mikrofon na tipkovnici'}</div>
+      <div class="field"><textarea id="smartText" rows="2" placeholder="npr. sutra u 18 trening"></textarea></div>
+      <div class="smart-prev" id="smartPrev">${smartPreview(null)}</div>
+      <button class="btn" id="smartSave" disabled>Spremi</button>
+      <button class="btn ghost" id="smartEdit" disabled>Spremi i uredi detalje</button>
+    </div>`);
+  const ta = document.getElementById('smartText'), prev = document.getElementById('smartPrev');
+  const saveB = document.getElementById('smartSave'), editB = document.getElementById('smartEdit');
+  let parsed = null;
+  const update = () => { parsed = parseSmart(ta.value); prev.innerHTML = smartPreview(parsed); saveB.disabled = editB.disabled = !parsed || (parsed.kind === 'event' && !parsed.title) || (parsed.kind === 'idea' && !parsed.text); };
+  ta.oninput = update;
+  const stopRec = () => { if (recog) { try { recog.stop(); } catch (e) {} } };
+  document.getElementById('micBtn').onclick = () => {
+    const btn = document.getElementById('micBtn'), hint = document.getElementById('micHint');
+    if (!SR) { ta.focus(); return; }
+    if (btn.classList.contains('on')) { stopRec(); return; }
+    try {
+      recog = new SR(); recog.lang = 'hr-HR'; recog.interimResults = true; recog.continuous = false;
+      const base = ta.value ? ta.value.trim() + ' ' : '';
+      recog.onresult = ev => { let txt = ''; for (const r of ev.results) txt += r[0].transcript; ta.value = base + txt; update(); };
+      recog.onstart = () => { btn.classList.add('on'); hint.textContent = 'Slušam…'; };
+      recog.onend = () => { btn.classList.remove('on'); hint.textContent = ta.value ? 'Provjeri pa spremi' : 'Dodirni mikrofon i reci'; };
+      recog.onerror = ev => {
+        btn.classList.remove('on');
+        hint.textContent = ev.error === 'not-allowed' ? 'Mikrofon nije dopušten – koristi mikrofon na tipkovnici' : 'Nije uspjelo – probaj mikrofon na tipkovnici';
+        ta.focus();
+      };
+      recog.start();
+    } catch (e) { hint.textContent = 'Koristi mikrofon na tipkovnici'; ta.focus(); }
+  };
+  const done = edit => {
+    if (!parsed) return; stopRec();
+    const s = saveSmart(parsed); save(); closeSheet(); render();
+    toast(s.type === 'tx' ? (s.item.type === 'in' ? 'Prihod spremljen' : 'Trošak spremljen') : s.type === 'idea' ? 'Ideja spremljena' : 'Obaveza spremljena');
+    if (edit) setTimeout(() => s.type === 'tx' ? openTxSheet(s.item) : s.type === 'idea' ? openIdeaSheet(s.item, null) : openEventSheet(s.item), 320);
+  };
+  saveB.onclick = () => done(false);
+  editB.onclick = () => done(true);
 }
 
 
