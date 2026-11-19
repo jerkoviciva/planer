@@ -1,5 +1,5 @@
 // Kad mijenjaš aplikaciju, povećaj broj verzije da se iPhone povuče novu verziju.
-const CACHE = 'planer-v7';
+const CACHE = 'planer-v8';
 const FILES = ['./', './index.html', './manifest.json', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

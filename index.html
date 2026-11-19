@@ -337,6 +337,11 @@
 .sp-meta span{font-size:13px;padding:4px 9px;background:rgba(0,0,0,.05);border-radius:0}
 [data-theme=dark] .sp-meta span{background:rgba(255,255,255,.08)}
 .btn[disabled]{opacity:.4;pointer-events:none}
+
+.fund{margin-top:10px;padding:10px 12px;border:1.5px dashed var(--orange);background:rgba(255,101,0,.05)}
+.fund-top{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+.fund-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.mini-btn.hot{background:var(--orange);border-color:var(--orange);color:#fff}
 </style>
 </head>
 <body>
@@ -1373,7 +1378,9 @@ function projection(acc, days) {
 }
 function confirmPlanned(p, d, amount) {
   state.tx.push({ id: uid(), created: Date.now(), type: p.type, amount: amount ?? p.amount, cat: p.cat, acc: p.acc, acc2: p.acc2, date: d > todayStr() ? todayStr() : d, note: p.note || '', planId: p.id });
-  p.doneDates ||= []; p.doneDates.push(d); save();
+  p.doneDates ||= []; p.doneDates.push(d);
+  if (p.debtId) { const dbt = state.debts.find(x => x.id === p.debtId); if (dbt) { const a = amount ?? p.amount; dbt.balance = Math.max(0, Math.round((dbt.balance - a) * 100) / 100); dbt.payments ||= []; dbt.payments.push({ date: d, amount: a, kind: 'rata' }); } }
+  save();
 }
 
 /* Dugovi */
@@ -1462,7 +1469,7 @@ function renderFinance() {
   view.querySelectorAll('[data-strat]').forEach(b => b.onclick = () => { state.settings.debtStrategy = b.dataset.strat; save(); render(); });
   view.querySelectorAll('[data-debt]').forEach(el => el.onclick = ev => {
     const d = state.debts.find(x => x.id === el.dataset.debt); if (!d) return;
-    if (ev.target.closest('[data-pay]')) openPaySheet(d); else openDebtSheet(d);
+    if (ev.target.closest('[data-fadd]')) openFundAddSheet(d); else if (ev.target.closest('[data-fpay]')) openFundPaySheet(d); else if (ev.target.closest('[data-pay]')) openPaySheet(d); else openDebtSheet(d);
   });
   view.querySelectorAll('[data-goal]').forEach(el => el.onclick = ev => {
     const g = state.goals.find(x => x.id === el.dataset.goal); if (!g) return;
@@ -1609,7 +1616,7 @@ function finDebts(bTek, tek) {
         <div class="note" style="margin:0">Ostalo <b style="color:var(--ink)">${M(d.balance)}</b>${d.payment ? ` · rata ${M(d.payment)}` : ''}${d.rate ? ` · ${String(d.rate).replace('.', ',')} %` : ''}<br>
         ${p.months === Infinity ? 'Rata ne pokriva kamatu!' : p.months ? `Gotovo ~${monthsToDate(p.months)}` : d.balance > 0 ? 'Dodaj ratu za procjenu' : 'Otplaćeno 🎉'}</div>
         ${d.balance > 0 ? `<button class="mini-btn" data-pay="1">Uplati</button>` : ''}
-      </div></div>`;
+      </div>${d.fund && d.balance > 0 ? fundHtml(d) : ''}${d.extraPaid ? `<div class="note" style="margin:6px 0 0">⚡ Ekstra uplaćeno <b style="color:var(--ink)">${M(d.extraPaid)}</b>${d.payment ? ` · kraće ~${Math.floor(d.extraPaid / d.payment)} ${plural(Math.floor(d.extraPaid / d.payment), 'mjesec', 'mjeseca', 'mjeseci')}` : ''}</div>` : ''}</div>`;
   };
   return `
     <div class="card">
@@ -1636,8 +1643,50 @@ function finDebts(bTek, tek) {
     ${paidOff.length ? `<div class="sec-head"><span class="section-title">Zatvoreno 🎉</span></div><div class="card tight">${paidOff.map(d => card(d)).join('')}</div>` : ''}`;
 }
 
+function fundTarget(d) { return d.fund.target || d.payment || 0; }
+function fundHtml(d) {
+  const t = fundTarget(d), sv = d.fund.saved || 0, pct = t ? Math.min(100, Math.round(sv / t * 100)) : 0, full = t && sv >= t;
+  return `<div class="fund">
+    <div class="fund-top"><span>⚡ Fond za ekstra ratu</span><span>${M(sv)} / ${M(t)}</span></div>
+    <div class="progress"><span style="width:${pct}%;background:${full ? 'var(--green)' : 'var(--orange)'}"></span></div>
+    <div class="fund-btns"><button class="mini-btn" data-fadd="1">+ Dodaj</button>${sv > 0 ? `<button class="mini-btn ${full ? 'hot' : ''}" data-fpay="1">${full ? 'Uplati ekstra ratu' : 'Uplati ekstra'}</button>` : ''}</div>
+  </div>`;
+}
+function openFundAddSheet(d) {
+  openSheet(`⚡ ${d.name}`, `
+    <div class="note" style="margin:0 0 12px">Fond za ekstra ratu: ${M(d.fund.saved || 0)} od ${M(fundTarget(d))}.</div>
+    <div class="field"><label>Dodaj u fond (€)</label><input id="f-amount" inputmode="decimal" style="font-size:24px;font-weight:800" placeholder="0,00"></div>
+    <label style="display:flex;gap:10px;align-items:center;margin:0 0 14px"><input type="checkbox" id="f-tr" checked style="width:20px;height:20px"> <span>Prebaci s tekućeg na štedni</span></label>
+    <button class="btn" id="f-ok">Dodaj</button>`);
+  setTimeout(() => document.getElementById('f-amount').focus(), 280);
+  document.getElementById('f-ok').onclick = () => {
+    const a = parseAmount(document.getElementById('f-amount').value); if (!(a > 0)) return toast('Upiši iznos');
+    d.fund.saved = Math.round(((d.fund.saved || 0) + a) * 100) / 100;
+    if (document.getElementById('f-tr').checked) state.tx.push({ id: uid(), created: Date.now(), type: 'transfer', amount: a, acc: 'tekuci', acc2: 'stedni', cat: 'transfer', date: todayStr(), note: `Fond ekstra rata: ${d.name}` });
+    save(); closeSheet(); render(); toast(d.fund.saved >= fundTarget(d) ? '⚡ Fond je pun – možeš uplatiti ekstra ratu!' : 'Dodano ✓');
+  };
+}
+function openFundPaySheet(d) {
+  const sv = d.fund.saved || 0, amt = Math.min(sv, d.balance);
+  openSheet(`Ekstra uplata: ${d.name}`, `
+    <div class="field"><label>Iznos (€)</label><input id="f-amount" inputmode="decimal" value="${String(amt).replace('.', ',')}" style="font-size:24px;font-weight:800"></div>
+    <div class="note" style="margin:0 0 12px">Novac ide iz fonda (sa štednog) i smanjuje dug odmah. Redovna rata ide i dalje normalno.</div>
+    <label style="display:flex;gap:10px;align-items:center;margin:0 0 14px"><input type="checkbox" id="f-tx" checked style="width:20px;height:20px"> <span>Zabilježi kao trošak sa štednog</span></label>
+    <button class="btn" id="f-ok">Uplati ekstra</button>`);
+  document.getElementById('f-ok').onclick = () => {
+    const a = parseAmount(document.getElementById('f-amount').value); if (!(a > 0)) return toast('Upiši iznos');
+    if (a > d.balance + 0.001) return toast('Iznos je veći od duga');
+    d.balance = Math.max(0, Math.round((d.balance - a) * 100) / 100);
+    d.fund.saved = Math.max(0, Math.round((sv - a) * 100) / 100);
+    d.extraPaid = Math.round(((d.extraPaid || 0) + a) * 100) / 100;
+    d.payments ||= []; d.payments.push({ date: todayStr(), amount: a, kind: 'ekstra' });
+    if (document.getElementById('f-tx').checked) state.tx.push({ id: uid(), created: Date.now(), type: 'out', amount: a, cat: 'otplata', acc: 'stedni', date: todayStr(), note: `Ekstra rata: ${d.name}` });
+    save(); closeSheet(); render(); toast(d.balance === 0 ? `🎉 ${d.name} je otplaćen!` : '⚡ Ekstra uplaćeno – kredit je kraći!');
+  };
+}
+
 function finSavings(bSted) {
-  const allocated = state.goals.reduce((s, g) => s + (g.saved || 0), 0);
+  const allocated = state.goals.reduce((s, g) => s + (g.saved || 0), 0) + state.debts.reduce((s, d) => s + (d.fund ? d.fund.saved || 0 : 0), 0);
   const free = bSted - allocated;
   const card = g => {
     const pct = g.target ? Math.min(100, Math.round((g.saved || 0) / g.target * 100)) : 0;
@@ -1657,6 +1706,8 @@ function finSavings(bSted) {
       <div class="stat"><div class="k">Slobodno</div><div class="v" style="color:${free < 0 ? 'var(--orange)' : 'inherit'}">${MS(free)}</div></div>
     </div>
     ${free < 0 && ui.reveal ? `<div class="warn">Ciljevima je dodijeljeno više nego što imaš na štednom.</div>` : ''}
+    ${state.debts.some(d => d.fund && d.balance > 0) ? `<div class="sec-head"><span class="section-title">Fondovi za kredite</span></div>
+    <div class="card tight">${state.debts.filter(d => d.fund && d.balance > 0).map(d => `<div class="debt" data-debt="${d.id}"><div class="top"><span class="nm">${esc(d.name)}</span></div>${fundHtml(d)}</div>`).join('')}</div>` : ''}
     <div class="sec-head"><span class="section-title">Ciljevi štednje</span></div>
     <div class="card tight">${state.goals.length ? state.goals.map(card).join('') : emptyArt('', 'prvi cilj?', 'Putovanje, selidba, novi laptop… dodaj na +')}</div>`;
 }
@@ -1819,12 +1870,16 @@ function openDebtSheet(existing) {
       <div class="field"><label>Mjesečna rata (€)</label><input id="f-pay" inputmode="decimal" value="${v(d.payment)}"></div>
       <div class="field"><label>Kamata (% god.)</label><input id="f-rate" inputmode="decimal" value="${v(d.rate)}" placeholder="neobavezno"></div>
     </div>
+    <div class="note" style="margin:-4px 0 12px">Ako banka pokazuje „preostala glavnica i kamata”, upiši taj iznos u „Još dugujem” i ostavi kamatu praznu.</div>
+    <label style="display:flex;gap:10px;align-items:center;margin:0 0 10px"><input type="checkbox" id="f-fund" ${d.fund ? 'checked' : ''} style="width:20px;height:20px"> <span>⚡ Štedim za ekstra ratu (fond)</span></label>
+    <div class="field ${d.fund ? '' : 'hidden'}" id="f-ft-w"><label>Cilj fonda (€) – prazno = jedna rata</label><input id="f-ft" inputmode="decimal" value="${d.fund && d.fund.target ? String(d.fund.target).replace('.', ',') : ''}" placeholder="${d.payment ? String(d.payment).replace('.', ',') : ''}"></div>
     <label style="display:flex;gap:10px;align-items:center;margin:0 0 14px"><input type="checkbox" id="f-plan" ${existing ? '' : 'checked'} style="width:20px;height:20px"> <span>Dodaj ratu u planirane troškove (svaki mjesec)</span></label>
     <div class="field ${existing ? 'hidden' : ''}" id="f-pd-w"><label>Datum prve rate</label><input id="f-pd" type="date" value="${addDays(todayStr(), 1)}"></div>
     <button class="btn" id="f-save">Spremi</button>
     ${existing ? `<button class="btn danger" id="f-del">Obriši dug</button>` : ''}`);
   if (!existing) setTimeout(() => document.getElementById('f-name').focus(), 280);
   document.getElementById('f-plan').onchange = e => document.getElementById('f-pd-w').classList.toggle('hidden', !e.target.checked);
+  document.getElementById('f-fund').onchange = e => document.getElementById('f-ft-w').classList.toggle('hidden', !e.target.checked);
   document.getElementById('f-save').onclick = () => {
     const name = document.getElementById('f-name').value.trim(); if (!name) return toast('Upiši naziv');
     const balance = parseAmount(document.getElementById('f-bal').value); if (!(balance >= 0)) return toast('Upiši iznos duga');
@@ -1833,6 +1888,8 @@ function openDebtSheet(existing) {
     const data = { name, balance, original: isFinite(original) && original >= balance ? original : Math.max(balance, existing?.original || 0), payment: isFinite(payment) ? payment : 0, rate: isFinite(rate) ? rate : 0 };
     let dbt = existing;
     if (existing) Object.assign(existing, data); else { dbt = { id: uid(), payments: [], ...data }; state.debts.push(dbt); }
+    if (document.getElementById('f-fund').checked) { const ft = parseAmount(document.getElementById('f-ft').value); dbt.fund = { saved: dbt.fund ? dbt.fund.saved || 0 : 0, target: isFinite(ft) && ft > 0 ? ft : 0 }; }
+    else if (dbt.fund && (dbt.fund.saved || 0) > 0) { if (!confirm(`U fondu je ${money(dbt.fund.saved)}. Ukloniti fond? (novac ostaje na štednom kao slobodan)`)) return; delete dbt.fund; } else delete dbt.fund;
     if (document.getElementById('f-plan').checked && data.payment > 0) {
       const pd = document.getElementById('f-pd').value || addDays(todayStr(), 1);
       state.planned.push({ id: uid(), type: 'out', amount: data.payment, cat: 'otplata', acc: 'tekuci', date: pd, repeat: 'monthly', note: `Rata: ${name}`, debtId: dbt.id, doneDates: [], skipDates: [] });
@@ -1851,7 +1908,7 @@ function openPaySheet(d) {
     <button class="btn" id="f-ok">Uplati</button>`);
   document.getElementById('f-ok').onclick = () => {
     const a = parseAmount(document.getElementById('f-amount').value); if (!(a > 0)) return toast('Upiši iznos');
-    d.balance = Math.max(0, Math.round((d.balance - a) * 100) / 100); d.payments ||= []; d.payments.push({ date: todayStr(), amount: a });
+    d.balance = Math.max(0, Math.round((d.balance - a) * 100) / 100); d.payments ||= []; d.payments.push({ date: todayStr(), amount: a, kind: 'rata' });
     if (document.getElementById('f-tx').checked) state.tx.push({ id: uid(), created: Date.now(), type: 'out', amount: a, cat: 'otplata', acc: 'tekuci', date: todayStr(), note: `Rata: ${d.name}` });
     save(); closeSheet(); render(); toast(d.balance === 0 ? `🎉 ${d.name} je otplaćen!` : 'Uplaćeno ✓');
   };
