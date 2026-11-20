@@ -342,6 +342,35 @@
 .fund-top{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
 .fund-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
 .mini-btn.hot{background:var(--orange);border-color:var(--orange);color:#fff}
+
+.bday{width:22px;height:22px;flex:none;display:grid;place-items:center;color:var(--orange)}
+.hero .bday{color:#fff}
+.wish .wish-row{font-size:18px;margin:2px 0 8px}
+.wish-link{color:var(--blue);font-size:14px}
+.afford{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-left:3px solid;background:rgba(0,0,0,.03);font-size:14px;line-height:1.4}
+.afford span{color:var(--muted)}
+.afford .dotc{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:none}
+[data-theme=dark] .afford{background:rgba(255,255,255,.05)}
+
+.cf-open{cursor:pointer}
+.cf-chart{touch-action:none;user-select:none;-webkit-user-select:none}
+.cf-day{margin-top:10px;padding:10px 12px;background:rgba(0,0,0,.035);border-left:3px solid var(--accent)}
+[data-theme=dark] .cf-day{background:rgba(255,255,255,.05)}
+.cf-day-head{display:flex;justify-content:space-between;font-size:15px;margin-bottom:4px}
+.cf-day-head .neg{color:var(--orange);font-weight:700}
+.cf-li{display:flex;justify-content:space-between;gap:10px;width:100%;padding:5px 0;font-size:14px;text-align:left;background:none;border:0;color:inherit}
+.cf-li i{color:var(--muted);font-style:normal;font-size:12px}
+.cf-li b.in{color:var(--green)}
+.cf-li.wi{color:var(--orange)}
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.cf-grid .stat{background:var(--surface);border:1px solid rgba(0,0,0,.08);padding:12px}
+.cf-grid .stat.wide{grid-column:1/-1}
+.cf-grid .v{font-size:18px;white-space:nowrap}
+.cf-row{padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.07)}
+.cf-row:last-child{border-bottom:0}
+.cf-row-h{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.wi-sel{flex:1;min-width:0;padding:8px;border:1px solid var(--ink);background:transparent;color:inherit;font:inherit;font-size:13px}
+#cfDays{margin-top:-4px}
 </style>
 </head>
 <body>
@@ -439,6 +468,7 @@ function normalize(d) {
   for (const k of ['planned', 'debts', 'goals', 'focusLog', 'courses', 'moments', 'subjects', 'projects', 'inbox', 'events', 'tx']) if (!Array.isArray(s[k])) s[k] = [];
   s.tx.forEach(t => { if (!t.acc) t.acc = 'tekuci'; });
   if (!Array.isArray(s.favVerses)) s.favVerses = [];
+  if (!Array.isArray(s.wishes)) s.wishes = [];
   return s;
 }
 function load() {
@@ -559,7 +589,7 @@ backBtn.innerHTML = icon('chevron-left');
 fab.innerHTML = icon('plus', 28, 2);
 tabsEl.innerHTML = TABS.map(t => `<button data-tab="${t.id}">${icon(t.ico, 22)}${t.name}</button>`).join('');
 
-function go(tab) { ui.tab = tab; ui.subject = null; ui.project = null; ui.course = null; window.scrollTo(0, 0); render(); }
+function go(tab) { ui.cashflow = false; ui.tab = tab; ui.subject = null; ui.project = null; ui.course = null; window.scrollTo(0, 0); render(); }
 
 function setHeader(title, sub, { back = false, btn = null, big = false } = {}) {
   titleEl.textContent = title; subEl.textContent = sub;
@@ -624,8 +654,9 @@ function renderHome() {
   setHeader(NAME, `${greeting()},`, { big: true, btn: { ico: 'settings-2', label: 'Postavke', onclick: () => go('postavke') } });
 
   const todays = occs(today, today);
-  const left = todays.filter(o => !o.done).length;
-  const weekCount = occs(today, addDays(today, 7)).filter(o => !o.done).length;
+  const tasks = todays.filter(o => o.e.cat !== 'rodjendan');
+  const left = tasks.filter(o => !o.done).length;
+  const weekCount = occs(today, addDays(today, 7)).filter(o => !o.done && o.e.cat !== 'rodjendan').length;
   const bal = accBalance('tekuci');
   const nextFaks = occs(today, addDays(today, 120), e => e.cat === 'faks').find(o => !o.done);
   const activeCourses = state.courses.filter(c => !c.archived);
@@ -652,9 +683,9 @@ function renderHome() {
       <div class="inner">
         <div class="kicker">${DAYS[d.getDay()]},</div>
         <h3>${d.getDate()}. ${MONTHS_GEN[d.getMonth()]}</h3>
-        <div class="hand">${todays.length ? (left ? `još ${left} ${plural(left, 'stvar', 'stvari', 'stvari')} za danas` : 'sve gotovo, bravo') : line}</div>
+        <div class="hand">${tasks.length ? (left ? `još ${left} ${plural(left, 'stvar', 'stvari', 'stvari')} za danas` : 'sve gotovo, bravo') : line}</div>
         <hr>
-        <div class="hero-list">${todays.length ? todays.map(o => eventRow(o)).join('') : `<div class="empty">Danas nemaš ništa upisano.</div>`}</div>
+        <div class="hero-list">${todays.length ? todays.slice().sort((a, b) => (b.e.cat === 'rodjendan') - (a.e.cat === 'rodjendan')).map(o => eventRow(o)).join('') : `<div class="empty">Danas nemaš ništa upisano.</div>`}</div>
       </div>
       ${tr.length || bdays.length ? `<div class="hero-pills">
         ${tr.length ? `<span>${icon('dumbbell', 16)} ${trDone}/${tr.length} ${plural(tr.length, 'trening', 'treninga', 'treninga')} ovaj tjedan</span>` : ''}
@@ -1012,11 +1043,11 @@ function eventRow(o, showDate, showCountdown) {
   const c = evCat(e.cat);
   let extra = '';
   if (e.cat === 'rodjendan' && e.repeat === 'yearly') { const age = parseYmd(d).getFullYear() - parseYmd(e.date).getFullYear(); if (age > 0 && age < 120) extra = `${age}. rođendan`; }
-  const meta = [showDate ? niceDate(d) : null, e.time || (showDate ? null : 'Cijeli dan'), s ? s.name : c.name, extra || null].filter(Boolean).join(' · ');
+  const meta = e.cat === 'rodjendan' ? [showDate ? niceDate(d) : null, extra || 'Rođendan', d === todayStr() ? 'čestitaj! 🎉' : null].filter(Boolean).join(' · ') : [showDate ? niceDate(d) : null, e.time || (showDate ? null : 'Cijeli dan'), s ? s.name : c.name, extra || null].filter(Boolean).join(' · ');
   const color = eventColor(e);
   const badge = showCountdown && !done ? `<span class="badge" style="background:${hexA(color,.12)};color:${color}">${countdown(d)}</span>` : '';
-  return `<div class="item ${done ? 'done' : ''}" data-ev="${e.id}" data-d="${d}">
-    <span class="check ${done ? 'on' : ''}">${done ? icon('check', 14, 3) : ''}</span>
+  return `<div class="item ${done && e.cat !== 'rodjendan' ? 'done' : ''}" data-ev="${e.id}" data-d="${d}">
+    ${e.cat === 'rodjendan' ? `<span class="bday">${icon('cake', 18, 1.8)}</span>` : `<span class="check ${done ? 'on' : ''}">${done ? icon('check', 14, 3) : ''}</span>`}
     <span class="bar" style="background:${color}"></span>
     <div class="main"><div class="title">${esc(e.title)}</div><div class="meta">${isRec(e) ? '↻ ' : ''}${esc(meta)}${e.note ? ' · ' + esc(e.note) : ''}</div></div>
     ${badge}
@@ -1155,6 +1186,9 @@ function parseSmart(input) {
   const ideaM = s.match(/^\s*(?:zapiSi |nova |brza )?ideja:?\s+(.*)$/) || s.match(/^\s*(?:zapiSi |dodaj )?ideju:?\s+(.*)$/);
   if (ideaM) { res.kind = 'idea'; res.text = fromKey(ideaM[1].trim()); res.text = res.text.charAt(0).toUpperCase() + res.text.slice(1); return res; }
 
+  const wishM = s.match(/^\s*(?:Zelim(?: si)?(?: kupiti| kupit)?|Zelja:?|lista Zelja:?)\s+(.*)$/);
+  if (wishM) { res.wish = true; s = ' ' + wishM[1] + ' '; }
+
   // --- iznos (novac)
   let amount = null;
   const am = s.match(/(\d+(?:[.,]\d{1,2})?)\s*(?:€|eur\b|eura\b|euro\b|eure\b|e\b)(?:\s*(?:i\s*)?(\d{1,2})\s*(?:centi|cent|c)\b)?/);
@@ -1228,6 +1262,7 @@ function parseSmart(input) {
     }
   }
 
+  if (res.wish) { res.kind = 'wish'; }
   res.date = date || (res.repeat === 'weekly' ? (() => { const cur = wdIdx(today); const first = res.days.map(d => (d - cur + 7) % 7).sort((a, b) => a - b)[0]; return addDays(today, first); })() : today);
 
   // --- kategorija obaveze
@@ -1257,6 +1292,7 @@ function parseSmart(input) {
 function smartPreview(r) {
   if (!r) return `<div class="empty">Reci ili upiši npr. <b>„sutra u 18 trening”</b>, <b>„kava 3,50 eura”</b>, <b>„svaki ponedjeljak i srijedu u 7 teretana”</b>, <b>„rođendan Ana 12. prosinca”</b> ili <b>„ideja: vez na trapericama”</b>.</div>`;
   if (r.kind === 'idea') return `<div class="sp-kind">${icon('lightbulb', 16)} Ideja</div><div class="sp-title">${esc(r.text)}</div>`;
+  if (r.kind === 'wish') return `<div class="sp-kind">${icon('heart', 16)} Lista želja</div><div class="sp-title">${esc(r.title || 'Želja')}</div><div class="sp-meta">${r.amount ? `<span>${money(r.amount)}</span>` : '<span>dodaj cijenu</span>'}<span>pravilo 30 dana</span></div>`;
   if (r.kind === 'tx') {
     const cats = r.txType === 'in' ? INCOME_CATS : EXPENSE_CATS; const c = cats.find(x => x.id === r.txCat) || cats[cats.length - 1];
     return `<div class="sp-kind">${icon('wallet', 16)} ${r.txType === 'in' ? 'Prihod' : 'Trošak'}</div>
@@ -1272,6 +1308,7 @@ function smartPreview(r) {
 
 function saveSmart(r) {
   if (r.kind === 'idea') { const i = { id: uid(), text: r.text, date: todayStr() }; state.inbox.push(i); return { type: 'idea', item: i }; }
+  if (r.kind === 'wish') { state.wishes ||= []; const w = { id: uid(), added: todayStr(), name: r.title || 'Želja', price: r.amount || 0, need: false, link: '' }; state.wishes.push(w); return { type: 'wish', item: w }; }
   if (r.kind === 'tx') {
     const t = { id: uid(), created: Date.now(), type: r.txType, amount: r.amount, cat: r.txCat, acc: r.acc, date: r.date, note: r.title };
     state.tx.push(t); return { type: 'tx', item: t };
@@ -1295,7 +1332,7 @@ function openSmartSheet() {
   const ta = document.getElementById('smartText'), prev = document.getElementById('smartPrev');
   const saveB = document.getElementById('smartSave'), editB = document.getElementById('smartEdit');
   let parsed = null;
-  const update = () => { parsed = parseSmart(ta.value); prev.innerHTML = smartPreview(parsed); saveB.disabled = editB.disabled = !parsed || (parsed.kind === 'event' && !parsed.title) || (parsed.kind === 'idea' && !parsed.text); };
+  const update = () => { parsed = parseSmart(ta.value); prev.innerHTML = smartPreview(parsed); saveB.disabled = editB.disabled = !parsed || (parsed.kind === 'event' && !parsed.title) || (parsed.kind === 'idea' && !parsed.text) || (parsed.kind === 'wish' && !parsed.amount); };
   ta.oninput = update;
   const stopRec = () => { if (recog) { try { recog.stop(); } catch (e) {} } };
   document.getElementById('micBtn').onclick = () => {
@@ -1319,8 +1356,8 @@ function openSmartSheet() {
   const done = edit => {
     if (!parsed) return; stopRec();
     const s = saveSmart(parsed); save(); closeSheet(); render();
-    toast(s.type === 'tx' ? (s.item.type === 'in' ? 'Prihod spremljen' : 'Trošak spremljen') : s.type === 'idea' ? 'Ideja spremljena' : 'Obaveza spremljena');
-    if (edit) setTimeout(() => s.type === 'tx' ? openTxSheet(s.item) : s.type === 'idea' ? openIdeaSheet(s.item, null) : openEventSheet(s.item), 320);
+    toast(s.type === 'tx' ? (s.item.type === 'in' ? 'Prihod spremljen' : 'Trošak spremljen') : s.type === 'idea' ? 'Ideja spremljena' : s.type === 'wish' ? '⏳ Na listi želja' : 'Obaveza spremljena');
+    if (edit) setTimeout(() => s.type === 'wish' ? openWishSheet(s.item) : s.type === 'tx' ? openTxSheet(s.item) : s.type === 'idea' ? openIdeaSheet(s.item, null) : openEventSheet(s.item), 320);
   };
   saveB.onclick = () => done(false);
   editB.onclick = () => done(true);
@@ -1398,6 +1435,7 @@ function orderedDebts() {
 }
 
 function renderFinance() {
+  if (ui.cashflow) return renderCashflow();
   setHeader('Financije', 'The money dept.', { btn: { ico: ui.reveal ? 'eye-off' : 'eye', label: 'Prikaži iznose', onclick: toggleReveal } });
   const tek = accById('tekuci'), sted = accById('stedni');
   const bTek = accBalance('tekuci'), bSted = accBalance('stedni');
@@ -1458,6 +1496,7 @@ function renderFinance() {
     state.settings.financeSetup = true; save(); ui.reveal = true; render(); toast('Stanje spremljeno');
   };
   bindPlanRows();
+  const cfo = document.getElementById('cfOpen'); if (cfo) cfo.onclick = () => { ui.cashflow = true; window.scrollTo(0, 0); render(); };
   view.querySelectorAll('[data-tx]').forEach(el => el.onclick = () => { const t = state.tx.find(x => x.id === el.dataset.tx); if (t) openTxSheet(t); });
   const q = id => document.getElementById(id);
   if (q('prevB')) q('prevB').onclick = () => shiftBud(-1);
@@ -1475,6 +1514,7 @@ function renderFinance() {
     const g = state.goals.find(x => x.id === el.dataset.goal); if (!g) return;
     if (ev.target.closest('[data-add]')) openGoalAddSheet(g); else openGoalSheet(g);
   });
+  bindWishes();
 }
 function shiftBud(d) { ui.budM += d; if (ui.budM < 0) { ui.budM = 11; ui.budY--; } if (ui.budM > 11) { ui.budM = 0; ui.budY++; } render(); }
 
@@ -1580,8 +1620,8 @@ function finPlan(bTek, tek) {
   if (over) warn = `<div class="warn">⚠︎ <b>${shortDate(over.d)}</b> prelaziš dozvoljeni minus${ui.reveal ? ` (${money(over.b)})` : ''}. Pomakni ili smanji neki trošak.</div>`;
   else if (firstNeg && bTek >= 0) warn = `<div class="warn">Od <b>${shortDate(firstNeg.d)}</b> ulaziš u minus. Najdublje: <b>${MS(minP.b)}</b> (${shortDate(minP.d)}).</div>`;
   return `
-    <div class="card">
-      <div class="kicker" style="color:var(--muted)">Cash flow · tekući · 60 dana</div>
+    <div class="card cf-open" id="cfOpen">
+      <div class="kicker" style="color:var(--muted);display:flex;justify-content:space-between"><span>Cash flow · tekući · 60 dana</span><span style="color:var(--accent)">Detaljno ↗</span></div>
       ${chartSvg(pts, tek.overdraft || 0)}
       <div class="summary" style="margin-top:6px">
         <div class="stat"><div class="k">Najniže</div><div class="v" style="font-size:18px;color:${minP.b < 0 ? 'var(--orange)' : 'inherit'}">${MS(minP.b)}</div><div class="note" style="margin:0">${shortDate(minP.d)}</div></div>
@@ -1596,6 +1636,141 @@ function finPlan(bTek, tek) {
       <div class="card tight">${state.planned.map(p => { const c = p.type === 'transfer' ? { ico: '⇄', name: 'Prijenos' } : txCat(p.cat); return `<button class="item" data-plan="${p.id}"><span class="cat-ico">${c.ico}</span>
         <div class="main"><div class="title">${esc(p.note || c.name)}</div><div class="meta">${p.repeat === 'monthly' ? `↻ svakog ${parseYmd(p.date).getDate()}. u mjesecu` : `jednom · ${shortDate(p.date)}`}</div></div>
         <span class="amount ${p.type === 'in' ? 'in' : p.type === 'transfer' ? 'tr' : ''}">${p.type === 'in' ? '+' : p.type === 'out' ? '−' : ''}${M(p.amount)}</span></button>`; }).join('')}</div>` : ''}`;
+}
+
+/* ===================== CASH FLOW – detaljno ===================== */
+function cfData(acc, days, whatIf) {
+  const t = todayStr();
+  let pts = projection(acc, days);
+  if (whatIf && whatIf.amount > 0) pts = pts.map(p => ({ ...p, b: p.d >= whatIf.date ? p.b - whatIf.amount : p.b }));
+  const items = {};
+  for (const o of pendingPlanned()) (items[t] ||= []).push({ ...o, late: true });
+  for (const o of upcomingPlanned(days)) (items[o.d] ||= []).push(o);
+  return { pts, items };
+}
+function cfChart(pts, items, acc, od, base) {
+  const W = 360, H = 230, L = 8, R = 8, T = 16, B = 26;
+  const vals = pts.map(p => p.b).concat(base ? base.map(p => p.b) : []);
+  let lo = Math.min(...vals, acc === 'tekuci' ? -od : 0, 0), hi = Math.max(...vals, 0);
+  const padv = (hi - lo) * .08 || 50; lo -= padv; hi += padv;
+  const n = pts.length;
+  const x = i => L + i * (W - L - R) / (n - 1);
+  const yv = v => T + (hi - v) * (H - T - B) / (hi - lo);
+  const line = arr => arr.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${yv(p.b).toFixed(1)}`).join('');
+  const path = line(pts);
+  const area = `${path}L${x(n - 1).toFixed(1)},${yv(lo).toFixed(1)}L${x(0)},${yv(lo).toFixed(1)}Z`;
+  const step = n > 120 ? 30 : n > 60 ? 15 : n > 31 ? 10 : 7;
+  const ticks = [];
+  for (let i = 0; i < n; i += step) ticks.push(i);
+  const tickSvg = ticks.map(i => { const d = parseYmd(pts[i].d); return `<text x="${x(i)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : 'middle'}">${d.getDate()}.${d.getMonth() + 1}.</text>`; }).join('');
+  const dots = pts.map((p, i) => {
+    const its = items[p.d]; if (!its || !i && !its.length) return '';
+    const net = its.reduce((s, o) => s + planEffect(o.p, acc), 0); if (!net) return '';
+    return `<circle cx="${x(i)}" cy="${yv(p.b)}" r="3.2" fill="${net > 0 ? 'var(--green)' : 'var(--orange)'}"/>`;
+  }).join('');
+  return `<svg class="chart cf-chart" id="cfChart" viewBox="0 0 ${W} ${H}">
+    <path d="${area}" fill="var(--accent)" opacity=".08"/>
+    <line x1="${L}" x2="${W - R}" y1="${yv(0)}" y2="${yv(0)}" stroke="var(--ink)" stroke-width="1" opacity=".5"/>
+    <text x="${W - R}" y="${yv(0) - 4}" text-anchor="end">0 €</text>
+    ${acc === 'tekuci' && od ? `<line x1="${L}" x2="${W - R}" y1="${yv(-od)}" y2="${yv(-od)}" stroke="var(--orange)" stroke-width="1.2" stroke-dasharray="4 4"/>
+    <text x="${W - R}" y="${yv(-od) - 4}" text-anchor="end" style="fill:var(--orange)">limit minusa</text>` : ''}
+    ${base ? `<path d="${line(base)}" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="3 3"/>` : ''}
+    <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linejoin="round"/>
+    ${dots}
+    <line id="cfCross" x1="0" x2="0" y1="${T}" y2="${H - B}" stroke="var(--ink)" stroke-width="1" opacity="0"/>
+    <circle id="cfDot" r="5.5" fill="var(--ink)" opacity="0"/>
+    ${tickSvg}
+  </svg>`;
+}
+function cfDayInfo(p, items, acc) {
+  const its = items[p.d] || [];
+  return `<div class="cf-day-head"><b>${niceDate(p.d)}</b><span class="${p.b < 0 ? 'neg' : ''}">${MS(p.b)}</span></div>
+    ${its.length ? its.map(o => { const e = planEffect(o.p, acc); return `<div class="cf-li"><span>${esc(o.p.note || txCat(o.p.cat).name)}${o.late ? ' <i>(čeka potvrdu)</i>' : ''}</span><b class="${e > 0 ? 'in' : ''}">${e > 0 ? '+' : '−'}${M(Math.abs(e))}</b></div>`; }).join('') : '<div class="note" style="margin:4px 0 0">Nema planiranih stavki taj dan.</div>'}`;
+}
+function renderCashflow() {
+  const acc = ui.cfAcc || 'tekuci', days = ui.cfDays || 60;
+  const tek = accById('tekuci'), od = acc === 'tekuci' ? tek.overdraft || 0 : 0;
+  setHeader('Cash flow', `${acc === 'tekuci' ? 'Tekući' : 'Štedni'} · ${days} dana`, { back: true, btn: { ico: ui.reveal ? 'eye-off' : 'eye', label: 'Prikaži iznose', onclick: toggleReveal } });
+  const wi = ui.cfWhatIf;
+  const { pts, items } = cfData(acc, days, wi);
+  const base = wi ? cfData(acc, days).pts : null;
+  ui.cfPts = pts; ui.cfItems = items;
+  const minP = pts.reduce((a, p) => p.b < a.b ? p : a, pts[0]);
+  const endP = pts[pts.length - 1];
+  let tin = 0, tout = 0;
+  Object.values(items).flat().forEach(o => { const e = planEffect(o.p, acc); if (e > 0) tin += e; else tout -= e; });
+  if (wi && wi.amount > 0) tout += wi.amount;
+  const months = {};
+  Object.entries(items).forEach(([d, its]) => its.forEach(o => { const k = d.slice(0, 7), e = planEffect(o.p, acc); months[k] ||= { in: 0, out: 0 }; if (e > 0) months[k].in += e; else months[k].out -= e; }));
+  if (wi && wi.amount > 0) { const k = wi.date.slice(0, 7); months[k] ||= { in: 0, out: 0 }; months[k].out += wi.amount; }
+  const dayList = pts.filter(p => (items[p.d] || []).length || (wi && p.d === wi.date));
+  const over = acc === 'tekuci' && pts.find(p => p.b < -od);
+  const firstNeg = pts.find(p => p.b < 0);
+
+  view.innerHTML = `
+    <div class="seg" id="cfAcc"><button data-a="tekuci" class="${acc === 'tekuci' ? 'on' : ''}">Tekući</button><button data-a="stedni" class="${acc === 'stedni' ? 'on' : ''}">Štedni</button></div>
+    <div class="seg" id="cfDays">${[30, 60, 90, 180].map(d => `<button data-d="${d}" class="${days === d ? 'on' : ''}">${d} d</button>`).join('')}</div>
+    <div class="card">
+      ${cfChart(pts, items, acc, od, base)}
+      <div class="note" style="margin:2px 0 0;text-align:center">Dodirni ili povuci po grafu za detalje dana · <span style="color:var(--green)">●</span> prihod <span style="color:var(--orange)">●</span> trošak${wi ? ' · <span style="opacity:.7">- - bez „što ako”</span>' : ''}</div>
+      <div class="cf-day" id="cfInfo">${cfDayInfo(pts[0], items, acc)}</div>
+    </div>
+    ${over ? `<div class="warn">⚠︎ <b>${shortDate(over.d)}</b> prelaziš dozvoljeni minus.</div>` : firstNeg && pts[0].b >= 0 ? `<div class="warn">Od <b>${shortDate(firstNeg.d)}</b> ulaziš u minus.</div>` : ''}
+    <div class="cf-grid">
+      <div class="stat"><div class="k">Danas</div><div class="v">${MS(pts[0].b)}</div></div>
+      <div class="stat"><div class="k">Najniže · ${shortDate(minP.d)}</div><div class="v" style="color:${minP.b < 0 ? 'var(--orange)' : 'inherit'}">${MS(minP.b)}</div></div>
+      <div class="stat"><div class="k">Ulazi</div><div class="v" style="color:var(--green)">+${M(tin)}</div></div>
+      <div class="stat"><div class="k">Izlazi</div><div class="v">−${M(tout)}</div></div>
+      <div class="stat wide"><div class="k">Na kraju · ${shortDate(endP.d)}</div><div class="v">${MS(endP.b)}</div></div>
+    </div>
+
+    <div class="sec-head"><span class="section-title">Što ako?</span></div>
+    <div class="card">
+      <div class="note" style="margin:0 0 10px">Probaj kupnju ili trošak prije nego ga napraviš – vidi kako mijenja graf.</div>
+      <div class="row2">
+        <div class="field"><label>Iznos (€)</label><input id="wiAmt" inputmode="decimal" value="${wi ? String(wi.amount).replace('.', ',') : ''}" placeholder="npr. 150"></div>
+        <div class="field"><label>Datum</label><input id="wiDate" type="date" value="${wi ? wi.date : todayStr()}"></div>
+      </div>
+      <div class="actions" style="margin:0"><button id="wiGo">Prikaži</button>${wi ? '<button id="wiClear">Makni</button>' : ''}${(state.wishes || []).length ? `<select id="wiWish" class="wi-sel"><option value="">S liste želja…</option>${state.wishes.map(w => `<option value="${w.id}">${esc(w.name)}</option>`).join('')}</select>` : ''}</div>
+    </div>
+
+    <div class="sec-head"><span class="section-title">Po mjesecima</span></div>
+    <div class="card tight">${Object.keys(months).sort().map(k => { const m = months[k], net = m.in - m.out, d = parseYmd(k + '-01'); return `<div class="item"><div class="main"><div class="title">${MONTHS[d.getMonth()]} ${d.getFullYear()}.</div><div class="meta"><span style="color:var(--green)">+${M(m.in)}</span> · −${M(m.out)}</div></div><span class="amount ${net >= 0 ? 'in' : ''}">${net >= 0 ? '+' : '−'}${M(Math.abs(net))}</span></div>`; }).join('') || emptyArt('', 'ništa planirano', 'Dodaj plaću, najam, rate… na +')}</div>
+
+    <div class="sec-head"><span class="section-title">Dan po dan</span></div>
+    <div class="card tight">${dayList.length ? dayList.map(p => {
+      const its = items[p.d] || [];
+      const rows = its.map(o => { const e = planEffect(o.p, acc); return `<button class="cf-li" data-plan="${o.p.id}"><span>${esc(o.p.note || txCat(o.p.cat).name)}${o.late ? ' <i>(čeka)</i>' : ''}</span><b class="${e > 0 ? 'in' : ''}">${e > 0 ? '+' : '−'}${M(Math.abs(e))}</b></button>`; }).join('') + (wi && p.d === wi.date ? `<div class="cf-li wi"><span>Što ako</span><b>−${M(wi.amount)}</b></div>` : '');
+      const col = acc === 'tekuci' && p.b < -od ? '#d33' : p.b < 0 ? 'var(--orange)' : 'var(--ink)';
+      return `<div class="cf-row"><div class="cf-row-h"><span>${niceDate(p.d)}</span><b style="color:${col}">${MS(p.b)}</b></div>${rows}</div>`;
+    }).join('') : emptyArt('', 'nema stavki', 'U ovom razdoblju nema planiranih prihoda ni troškova.')}</div>`;
+
+  document.getElementById('cfAcc').onclick = ev => { const b = ev.target.closest('[data-a]'); if (b) { ui.cfAcc = b.dataset.a; render(); } };
+  document.getElementById('cfDays').onclick = ev => { const b = ev.target.closest('[data-d]'); if (b) { ui.cfDays = +b.dataset.d; render(); } };
+  document.getElementById('wiGo').onclick = () => {
+    const a = parseAmount(document.getElementById('wiAmt').value); if (!(a > 0)) return toast('Upiši iznos');
+    ui.cfWhatIf = { amount: a, date: document.getElementById('wiDate').value || todayStr() }; render();
+  };
+  if (document.getElementById('wiClear')) document.getElementById('wiClear').onclick = () => { ui.cfWhatIf = null; render(); };
+  if (document.getElementById('wiWish')) document.getElementById('wiWish').onchange = e => { const w = state.wishes.find(x => x.id === e.target.value); if (w) { ui.cfWhatIf = { amount: w.price, date: todayStr() }; render(); } };
+  view.querySelectorAll('[data-plan]').forEach(el => el.onclick = () => { const p = state.planned.find(x => x.id === el.dataset.plan); if (p) openPlanSheet(p); });
+
+  const svg = document.getElementById('cfChart');
+  const pick = ev => {
+    const r = svg.getBoundingClientRect();
+    const cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    const vb = svg.viewBox.baseVal, sx = cx * vb.width / r.width;
+    const n = pts.length, i = Math.max(0, Math.min(n - 1, Math.round((sx - 8) / ((vb.width - 16) / (n - 1)))));
+    const pathEl = svg.querySelector('path[stroke-width="2.4"]');
+    const xi = 8 + i * (vb.width - 16) / (n - 1);
+    const seg = pathEl.getAttribute('d').split(/[ML]/).filter(Boolean)[i].split(',');
+    svg.querySelector('#cfCross').setAttribute('x1', xi); svg.querySelector('#cfCross').setAttribute('x2', xi); svg.querySelector('#cfCross').setAttribute('opacity', '.35');
+    const dot = svg.querySelector('#cfDot'); dot.setAttribute('cx', seg[0]); dot.setAttribute('cy', seg[1]); dot.setAttribute('opacity', '1');
+    document.getElementById('cfInfo').innerHTML = cfDayInfo(pts[i], items, acc);
+  };
+  svg.addEventListener('click', pick);
+  svg.addEventListener('touchstart', pick, { passive: true });
+  svg.addEventListener('touchmove', e => { e.preventDefault(); pick(e); }, { passive: false });
 }
 
 function finDebts(bTek, tek) {
@@ -1709,7 +1884,112 @@ function finSavings(bSted) {
     ${state.debts.some(d => d.fund && d.balance > 0) ? `<div class="sec-head"><span class="section-title">Fondovi za kredite</span></div>
     <div class="card tight">${state.debts.filter(d => d.fund && d.balance > 0).map(d => `<div class="debt" data-debt="${d.id}"><div class="top"><span class="nm">${esc(d.name)}</span></div>${fundHtml(d)}</div>`).join('')}</div>` : ''}
     <div class="sec-head"><span class="section-title">Ciljevi štednje</span></div>
-    <div class="card tight">${state.goals.length ? state.goals.map(card).join('') : emptyArt('', 'prvi cilj?', 'Putovanje, selidba, novi laptop… dodaj na +')}</div>`;
+    <div class="card tight">${state.goals.length ? state.goals.map(card).join('') : emptyArt('', 'prvi cilj?', 'Putovanje, selidba, novi laptop… dodaj na +')}</div>
+    ${wishSection()}`;
+}
+
+/* ===================== LISTA ŽELJA (pravilo 30 dana) ===================== */
+const WISH_DAYS = 30;
+function nextIncomeDate() {
+  const up = upcomingPlanned(45).find(o => o.p.type === 'in' && (o.p.acc || 'tekuci') === 'tekuci');
+  return up ? up.d : null;
+}
+function affordCheck(price) {
+  const tek = accById('tekuci');
+  const pay = nextIncomeDate();
+  const horizon = pay ? Math.max(1, daysUntil(pay) - 1) : 30;
+  const pts = projection('tekuci', horizon);
+  const low = Math.min(...pts.map(p => p.b));
+  const after = low - price;
+  const od = tek.overdraft || 0;
+  const free = accBalance('stedni') - state.goals.reduce((s, g) => s + (g.saved || 0), 0) - state.debts.reduce((s, d) => s + (d.fund ? d.fund.saved || 0 : 0), 0);
+  let level, text;
+  if (after >= 0) { level = 'ok'; text = 'Možeš bez minusa'; }
+  else if (after >= -od) { level = 'warn'; text = 'Ušla bi u minus'; }
+  else { level = 'no'; text = 'Prelazi dozvoljeni minus'; }
+  return { level, text, after, low, pay, free, fromSavings: free >= price };
+}
+function wishHtml(w) {
+  const age = daysUntil(w.added) * -1;
+  const left = Math.max(0, WISH_DAYS - age);
+  const pct = Math.min(100, Math.round(age / WISH_DAYS * 100));
+  const a = affordCheck(w.price);
+  const col = a.level === 'ok' ? 'var(--green)' : a.level === 'warn' ? 'var(--orange)' : '#d33';
+  return `<div class="debt wish" data-wish="${w.id}">
+    <div class="top"><span class="nm">${esc(w.name)}</span><span class="rk">${w.need ? 'treba mi' : 'želim'}</span></div>
+    <div class="wish-row"><b>${M(w.price)}</b>${w.link ? ` · <a href="${esc(w.link)}" target="_blank" rel="noopener" class="wish-link">link</a>` : ''}</div>
+    <div class="progress"><span style="width:${pct}%;background:${left ? 'var(--blue)' : 'var(--green)'}"></span></div>
+    <div class="note" style="margin:6px 0 0">${left ? `⏳ Još <b style="color:var(--ink)">${left} ${plural(left, 'dan', 'dana', 'dana')}</b> razmišljanja` : '✓ Prošlo je 30 dana. <b style="color:var(--ink)">Još ga želiš?</b>'}</div>
+    <div class="afford" style="border-color:${col}">
+      <span class="dotc" style="background:${col}"></span>
+      <div><b>${a.text}</b><br><span>${ui.reveal ? `Najniže stanje tekućeg${a.pay ? ` do plaće (${shortDate(a.pay)})` : ' idućih 30 dana'} nakon kupnje: <b>${MS(a.after)}</b>${a.fromSavings ? ` · ili sa štednog (slobodno ${M(a.free)})` : ''}` : 'Dodirni oko gore za iznose'}</span></div>
+    </div>
+    <div class="fund-btns">
+      <button class="mini-btn" data-wno="1">Ne treba mi</button>
+      <button class="mini-btn" data-wgoal="1">Štedi za to</button>
+      <button class="mini-btn ${!left ? 'hot' : ''}" data-wbuy="1">Kupila sam</button>
+    </div>
+  </div>`;
+}
+function wishSection() {
+  const list = (state.wishes || []).slice().sort((a, b) => a.added.localeCompare(b.added));
+  const saved = state.settings.wishSaved || 0;
+  return `<div class="sec-head"><span class="section-title">Lista želja</span><button class="link-btn" id="wishAdd">+ Dodaj</button></div>
+    <div class="note" style="margin:-4px 0 10px">Pravilo 30 dana: upiši što želiš kupiti i pričekaj. Ako i nakon mjesec dana želiš, a novca ima – kupi s mirom.${saved ? ` <b style="color:var(--ink)">Ušteđeno odustajanjem: ${M(saved)}</b>` : ''}</div>
+    <div class="card tight">${list.length ? list.map(wishHtml).join('') : emptyArt('', 'lista je prazna', 'Monitor, jakna, koncert… dodaj na + Dodaj')}</div>`;
+}
+function openWishSheet(existing) {
+  const w = existing || { name: '', price: '', need: false, link: '' };
+  openSheet(existing ? 'Uredi želju' : 'Nova želja', `
+    <div class="field"><label>Što želiš?</label><input id="f-name" value="${esc(w.name)}" placeholder="npr. Monitor" autocomplete="off"></div>
+    <div class="field"><label>Cijena (€)</label><input id="f-price" inputmode="decimal" value="${w.price === '' ? '' : String(w.price).replace('.', ',')}" style="font-size:24px;font-weight:800" placeholder="0,00"></div>
+    <div class="seg" id="f-need"><button data-n="0" class="${w.need ? '' : 'on'}">Samo želim</button><button data-n="1" class="${w.need ? 'on' : ''}">Treba mi (faks/posao)</button></div>
+    <div class="field"><label>Link (neobavezno)</label><input id="f-link" value="${esc(w.link || '')}" placeholder="https://…" autocomplete="off" inputmode="url"></div>
+    <button class="btn" id="f-save">Spremi</button>
+    ${existing ? `<button class="btn danger" id="f-del">Obriši</button>` : ''}`);
+  let need = !!w.need;
+  document.getElementById('f-need').onclick = ev => { const b = ev.target.closest('[data-n]'); if (!b) return; need = b.dataset.n === '1'; document.querySelectorAll('#f-need button').forEach(x => x.classList.toggle('on', x === b)); };
+  if (!existing) setTimeout(() => document.getElementById('f-name').focus(), 280);
+  document.getElementById('f-save').onclick = () => {
+    const name = document.getElementById('f-name').value.trim(); if (!name) return toast('Upiši što želiš');
+    const price = parseAmount(document.getElementById('f-price').value); if (!(price > 0)) return toast('Upiši cijenu');
+    let link = document.getElementById('f-link').value.trim(); if (link && !/^https?:\/\//i.test(link)) link = 'https://' + link;
+    const data = { name, price, need, link };
+    state.wishes ||= [];
+    if (existing) Object.assign(existing, data); else state.wishes.push({ id: uid(), added: todayStr(), ...data });
+    save(); closeSheet(); render(); toast(existing ? 'Spremljeno' : '⏳ Dodano – javim se za 30 dana');
+  };
+  if (existing) document.getElementById('f-del').onclick = () => { state.wishes = state.wishes.filter(x => x.id !== existing.id); save(); closeSheet(); render(); };
+}
+function bindWishes() {
+  const add = document.getElementById('wishAdd'); if (add) add.onclick = () => openWishSheet();
+  view.querySelectorAll('[data-wish]').forEach(el => el.onclick = ev => {
+    if (ev.target.closest('a')) return;
+    const w = (state.wishes || []).find(x => x.id === el.dataset.wish); if (!w) return;
+    if (ev.target.closest('[data-wno]')) {
+      state.wishes = state.wishes.filter(x => x.id !== w.id);
+      state.settings.wishSaved = Math.round(((state.settings.wishSaved || 0) + w.price) * 100) / 100;
+      save(); render(); toast(`Odlično! ${money(w.price)} ostaje kod tebe 💪`);
+    } else if (ev.target.closest('[data-wgoal]')) {
+      state.goals.push({ id: uid(), name: w.name, emoji: '🛍️', target: w.price, saved: 0, deadline: '' });
+      state.wishes = state.wishes.filter(x => x.id !== w.id);
+      save(); render(); toast('Cilj štednje napravljen 🎯');
+    } else if (ev.target.closest('[data-wbuy]')) {
+      const left = Math.max(0, WISH_DAYS + daysUntil(w.added));
+      if (left && !confirm(`Još ${left} dana do kraja pravila 30 dana. Ipak kupuješ?`)) return;
+      openSheet(`Kupnja: ${w.name}`, `
+        <div class="field"><label>Plaćeno (€)</label><input id="f-amount" inputmode="decimal" value="${String(w.price).replace('.', ',')}" style="font-size:24px;font-weight:800"></div>
+        <div class="field"><label>S računa</label>${accChips('f-acc', 'tekuci')}</div>
+        <button class="btn" id="f-ok">Zabilježi kupnju</button>`);
+      let acc = 'tekuci'; bindAccChips('f-acc', v => acc = v);
+      document.getElementById('f-ok').onclick = () => {
+        const a = parseAmount(document.getElementById('f-amount').value); if (!(a > 0)) return toast('Upiši iznos');
+        state.tx.push({ id: uid(), created: Date.now(), type: 'out', amount: a, cat: 'kupovina', acc, date: todayStr(), note: w.name });
+        state.wishes = state.wishes.filter(x => x.id !== w.id);
+        save(); closeSheet(); render(); toast('Uživaj u novoj stvari 🛍️');
+      };
+    } else openWishSheet(w);
+  });
 }
 
 /* --- Sheetovi za financije --- */
@@ -2624,13 +2904,14 @@ backBtn.onclick = () => {
   if (ui.subject) ui.subject = null;
   else if (ui.course) ui.course = null;
   else if (ui.project) ui.project = null;
+  else if (ui.cashflow) ui.cashflow = false;
   else if (ui.tab === 'postavke' || ui.tab === 'moments') ui.tab = 'home';
   window.scrollTo(0, 0); render();
 };
 fab.onclick = () => {
   if (ui.tab === 'kalendar') openEventSheet();
   else if (ui.tab === 'financije') {
-    if (ui.finSeg === 'plan') openPlanSheet();
+    if (ui.cashflow || ui.finSeg === 'plan') openPlanSheet();
     else if (ui.finSeg === 'dugovi') openDebtSheet();
     else if (ui.finSeg === 'stednja') openGoalSheet();
     else openTxSheet();
