@@ -371,6 +371,35 @@
 .cf-row-h{display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
 .wi-sel{flex:1;min-width:0;padding:8px;border:1px solid var(--ink);background:transparent;color:inherit;font:inherit;font-size:13px}
 #cfDays{margin-top:-4px}
+
+.lists-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.lists-strip button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 10px;background:var(--surface);border:1.5px solid var(--ink);text-align:left;color:inherit}
+.lists-strip span{font-size:20px}
+.lists-strip b{font-family:'Bodoni Moda',serif;font-size:17px}
+.lists-strip i{font-style:normal;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+.top3{border-left:4px solid var(--orange)}
+.li{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-bottom:1px solid rgba(0,0,0,.07);background:none;color:inherit;text-align:left;font:inherit}
+.li:last-child{border-bottom:0}
+.li .txt{flex:1;min-width:0;font-size:16px;display:flex;flex-direction:column}
+.li .txt em{font-style:normal;font-size:12px;color:var(--muted);margin-top:2px}
+.li .txt em.late{color:var(--orange)}
+.li.done .txt{text-decoration:line-through;opacity:.5}
+.li.bucket.done .txt{text-decoration:none;opacity:1}
+.li .star{background:none;border:0;font-size:20px;color:rgba(0,0,0,.2);padding:0 4px}
+.li .star.on{color:var(--orange)}
+.li .star.del{font-size:15px}
+[data-theme=dark] .li .star{color:rgba(255,255,255,.25)}
+[data-theme=dark] .li .star.on{color:var(--orange)}
+.top3 .li{padding:10px 0}
+.add-bar{display:flex;gap:8px;margin:0 0 10px}
+.add-bar input{flex:1;min-width:0;padding:14px;border:1.5px solid var(--ink);background:var(--surface);color:inherit;font:inherit;font-size:16px}
+.add-bar button{width:52px;background:var(--blue);color:#fff;border:0;display:grid;place-items:center}
+.chips.sugg{margin:0 0 10px}
+.bemoji{font-size:22px;width:28px;text-align:center}
+.bucket-hero{background:var(--night);color:#F6EFE6;border:0;margin-bottom:12px}
+.bucket-hero .kicker{color:var(--orange)}
+.bucket-hero .big{font-family:'Bodoni Moda',serif;font-size:54px;line-height:1;margin:6px 0 10px}
+.bucket-hero .big span{font-size:26px;opacity:.6}
 </style>
 </head>
 <body>
@@ -469,6 +498,7 @@ function normalize(d) {
   s.tx.forEach(t => { if (!t.acc) t.acc = 'tekuci'; });
   if (!Array.isArray(s.favVerses)) s.favVerses = [];
   if (!Array.isArray(s.wishes)) s.wishes = [];
+  s.lists = Object.assign({ todo: [], shop: [], bucket: [] }, s.lists || {});
   return s;
 }
 function load() {
@@ -601,13 +631,14 @@ function setHeader(title, sub, { back = false, btn = null, big = false } = {}) {
 
 function render() {
   tabsEl.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === ui.tab));
-  fab.classList.toggle('hidden', ['home', 'postavke'].includes(ui.tab));
+  fab.classList.toggle('hidden', ['home', 'postavke', 'liste'].includes(ui.tab));
   if (ui.tab === 'home') renderHome();
   else if (ui.tab === 'kalendar') renderPlanner();
   else if (ui.tab === 'financije') renderFinance();
   else if (ui.tab === 'ucenje') ui.subject ? renderSubject() : ui.course ? renderCourse() : renderLearning();
   else if (ui.tab === 'projekti') ui.project ? renderProject() : renderProjects();
   else if (ui.tab === 'moments') renderMoments();
+  else if (ui.tab === 'liste') renderLists();
   else renderSettings();
   view.classList.remove('fade'); void view.offsetWidth; view.classList.add('fade');
 }
@@ -727,6 +758,9 @@ function renderHome() {
       </button>
     </div>
 
+    ${topTodayHtml()}
+    ${listsStrip()}
+
     ${playerHtml()}
 
     <div class="quick">
@@ -749,6 +783,7 @@ function renderHome() {
   bindEventRows();
   bindPlayer();
   bindVerse();
+  bindListsHome();
   document.getElementById('q-voice').onclick = openSmartSheet;
   document.getElementById('q-ev').onclick = () => openEventSheet(null, { date: today });
   document.getElementById('q-mo').onclick = () => openMomentSheet();
@@ -1186,6 +1221,11 @@ function parseSmart(input) {
   const ideaM = s.match(/^\s*(?:zapiSi |nova |brza )?ideja:?\s+(.*)$/) || s.match(/^\s*(?:zapiSi |dodaj )?ideju:?\s+(.*)$/);
   if (ideaM) { res.kind = 'idea'; res.text = fromKey(ideaM[1].trim()); res.text = res.text.charAt(0).toUpperCase() + res.text.slice(1); return res; }
 
+  const fromRaw = t => { const i = raw.toLowerCase().lastIndexOf(t.toLowerCase()); return i >= 0 ? raw.slice(i, i + t.length) : t; };
+  const shopM = s.match(/^\s*(?:kupi(?:ti)?|dodaj na popis|na popis|za duKan|popis za duKan:?|kupovina:?)\s+(.*)$/);
+  if (shopM) { res.kind = 'shop'; res.text = fromRaw(fromKey(shopM[1].trim())); return res; }
+  const todoM = s.match(/^\s*(?:to ?do:?|zadatak:?|moram|trebam)\s+(.*)$/);
+  if (todoM && !/\b(sutra|danas|prekosutra|\d{1,2}[.:]\d{2}|u \d{1,2})\b/.test(todoM[1]) && !/\d+([.,]\d+)?\s*(€|eur)/.test(todoM[1])) { res.kind = 'todo'; res.text = fromRaw(fromKey(todoM[1].trim())); res.text = res.text.charAt(0).toUpperCase() + res.text.slice(1); return res; }
   const wishM = s.match(/^\s*(?:Zelim(?: si)?(?: kupiti| kupit)?|Zelja:?|lista Zelja:?)\s+(.*)$/);
   if (wishM) { res.wish = true; s = ' ' + wishM[1] + ' '; }
 
@@ -1292,6 +1332,8 @@ function parseSmart(input) {
 function smartPreview(r) {
   if (!r) return `<div class="empty">Reci ili upiši npr. <b>„sutra u 18 trening”</b>, <b>„kava 3,50 eura”</b>, <b>„svaki ponedjeljak i srijedu u 7 teretana”</b>, <b>„rođendan Ana 12. prosinca”</b> ili <b>„ideja: vez na trapericama”</b>.</div>`;
   if (r.kind === 'idea') return `<div class="sp-kind">${icon('lightbulb', 16)} Ideja</div><div class="sp-title">${esc(r.text)}</div>`;
+  if (r.kind === 'shop') return `<div class="sp-kind">🛒 Kupovina</div><div class="sp-title">${esc(r.text)}</div><div class="sp-meta"><span>na popis za dućan</span></div>`;
+  if (r.kind === 'todo') return `<div class="sp-kind">☑︎ To-do</div><div class="sp-title">${esc(r.text)}</div>`;
   if (r.kind === 'wish') return `<div class="sp-kind">${icon('heart', 16)} Lista želja</div><div class="sp-title">${esc(r.title || 'Želja')}</div><div class="sp-meta">${r.amount ? `<span>${money(r.amount)}</span>` : '<span>dodaj cijenu</span>'}<span>pravilo 30 dana</span></div>`;
   if (r.kind === 'tx') {
     const cats = r.txType === 'in' ? INCOME_CATS : EXPENSE_CATS; const c = cats.find(x => x.id === r.txCat) || cats[cats.length - 1];
@@ -1308,6 +1350,8 @@ function smartPreview(r) {
 
 function saveSmart(r) {
   if (r.kind === 'idea') { const i = { id: uid(), text: r.text, date: todayStr() }; state.inbox.push(i); return { type: 'idea', item: i }; }
+  if (r.kind === 'shop') { addShopItems(r.text); return { type: 'shop' }; }
+  if (r.kind === 'todo') { const t = { id: uid(), text: r.text, done: false, star: false, created: todayStr() }; listsInit().todo.push(t); return { type: 'todo', item: t }; }
   if (r.kind === 'wish') { state.wishes ||= []; const w = { id: uid(), added: todayStr(), name: r.title || 'Želja', price: r.amount || 0, need: false, link: '' }; state.wishes.push(w); return { type: 'wish', item: w }; }
   if (r.kind === 'tx') {
     const t = { id: uid(), created: Date.now(), type: r.txType, amount: r.amount, cat: r.txCat, acc: r.acc, date: r.date, note: r.title };
@@ -1356,7 +1400,8 @@ function openSmartSheet() {
   const done = edit => {
     if (!parsed) return; stopRec();
     const s = saveSmart(parsed); save(); closeSheet(); render();
-    toast(s.type === 'tx' ? (s.item.type === 'in' ? 'Prihod spremljen' : 'Trošak spremljen') : s.type === 'idea' ? 'Ideja spremljena' : s.type === 'wish' ? '⏳ Na listi želja' : 'Obaveza spremljena');
+    toast(s.type === 'tx' ? (s.item.type === 'in' ? 'Prihod spremljen' : 'Trošak spremljen') : s.type === 'idea' ? 'Ideja spremljena' : s.type === 'wish' ? '⏳ Na listi želja' : s.type === 'shop' ? '🛒 Na popisu za dućan' : s.type === 'todo' ? '☑︎ Dodano u To-do' : 'Obaveza spremljena');
+    if (edit && (s.type === 'shop' || s.type === 'todo')) { ui.listSeg = s.type; setTimeout(() => go('liste'), 320); return; }
     if (edit) setTimeout(() => s.type === 'wish' ? openWishSheet(s.item) : s.type === 'tx' ? openTxSheet(s.item) : s.type === 'idea' ? openIdeaSheet(s.item, null) : openEventSheet(s.item), 320);
   };
   saveB.onclick = () => done(false);
@@ -1636,6 +1681,167 @@ function finPlan(bTek, tek) {
       <div class="card tight">${state.planned.map(p => { const c = p.type === 'transfer' ? { ico: '⇄', name: 'Prijenos' } : txCat(p.cat); return `<button class="item" data-plan="${p.id}"><span class="cat-ico">${c.ico}</span>
         <div class="main"><div class="title">${esc(p.note || c.name)}</div><div class="meta">${p.repeat === 'monthly' ? `↻ svakog ${parseYmd(p.date).getDate()}. u mjesecu` : `jednom · ${shortDate(p.date)}`}</div></div>
         <span class="amount ${p.type === 'in' ? 'in' : p.type === 'transfer' ? 'tr' : ''}">${p.type === 'in' ? '+' : p.type === 'out' ? '−' : ''}${M(p.amount)}</span></button>`; }).join('')}</div>` : ''}`;
+}
+
+/* ===================== LISTE: To-do · Kupovina · Bucket list ===================== */
+const BUCKET_CATS = [
+  { id: 'putovanje', emoji: '✈️', name: 'Putovanje' },
+  { id: 'iskustvo', emoji: '✨', name: 'Iskustvo' },
+  { id: 'nauciti', emoji: '📚', name: 'Naučiti' },
+  { id: 'izazov', emoji: '🏔️', name: 'Izazov' },
+  { id: 'ostalo', emoji: '💫', name: 'Ostalo' },
+];
+const bucketCat = id => BUCKET_CATS.find(c => c.id === id) || BUCKET_CATS[BUCKET_CATS.length - 1];
+function listsInit() { state.lists ||= { todo: [], shop: [], bucket: [] }; for (const k of ['todo', 'shop', 'bucket']) state.lists[k] ||= []; return state.lists; }
+
+function listsStrip() {
+  const L = listsInit();
+  const todoOpen = L.todo.filter(t => !t.done).length, shopOpen = L.shop.filter(t => !t.done).length;
+  const bDone = L.bucket.filter(b => b.done).length;
+  return `<div class="lists-strip">
+    <button data-list="todo"><span>☑︎</span><b>To-do</b><i>${todoOpen ? `${todoOpen} otvoreno` : 'prazno'}</i></button>
+    <button data-list="shop"><span>🛒</span><b>Kupovina</b><i>${shopOpen ? `${shopOpen} za kupiti` : 'prazno'}</i></button>
+    <button data-list="bucket"><span>🌍</span><b>Bucket list</b><i>${L.bucket.length ? `${bDone}/${L.bucket.length}` : 'sanjaj'}</i></button>
+  </div>`;
+}
+function topTodayHtml() {
+  const top = listsInit().todo.filter(t => t.star && (!t.done || t.doneDate === todayStr()));
+  if (!top.length) return '';
+  return `<div class="card top3"><div class="kicker" style="color:var(--orange)">★ Top za danas</div>
+    ${top.map(t => `<button class="li ${t.done ? 'done' : ''}" data-top="${t.id}"><span class="check ${t.done ? 'on' : ''}">${t.done ? icon('check', 14, 3) : ''}</span><span class="txt">${esc(t.text)}</span></button>`).join('')}
+  </div>`;
+}
+function bindListsHome() {
+  view.querySelectorAll('[data-list]').forEach(b => b.onclick = () => { ui.listSeg = b.dataset.list; go('liste'); });
+  view.querySelectorAll('[data-top]').forEach(b => b.onclick = () => { const t = state.lists.todo.find(x => x.id === b.dataset.top); if (t) { toggleListItem(t); save(); render(); } });
+}
+function toggleListItem(t) { t.done = !t.done; t.doneDate = t.done ? todayStr() : null; }
+
+function renderLists() {
+  const L = listsInit();
+  const seg = ui.listSeg || 'todo';
+  const titles = { todo: ['To-do', 'Stvari za napraviti'], shop: ['Kupovina', 'Popis za dućan'], bucket: ['Bucket list', 'Jednom u životu'] };
+  setHeader(titles[seg][0], titles[seg][1], { back: true });
+  const segHtml = `<div class="seg" id="lseg2">
+    <button data-s="todo" class="${seg === 'todo' ? 'on' : ''}">To-do</button>
+    <button data-s="shop" class="${seg === 'shop' ? 'on' : ''}">Kupovina</button>
+    <button data-s="bucket" class="${seg === 'bucket' ? 'on' : ''}">Bucket</button></div>`;
+  const addBar = ph => `<div class="add-bar"><input id="liAdd" placeholder="${ph}" autocomplete="off" enterkeyhint="done"><button id="liAddB" aria-label="Dodaj">${icon('plus', 20, 2.2)}</button></div>`;
+  let body = '';
+
+  if (seg === 'todo') {
+    const open = L.todo.filter(t => !t.done).sort((a, b) => (b.star ? 1 : 0) - (a.star ? 1 : 0) || (a.due || '9999').localeCompare(b.due || '9999'));
+    const done = L.todo.filter(t => t.done);
+    const row = t => {
+      const late = t.due && !t.done && t.due < todayStr();
+      return `<div class="li ${t.done ? 'done' : ''}" data-li="${t.id}">
+        <span class="check ${t.done ? 'on' : ''}" data-tog="1">${t.done ? icon('check', 14, 3) : ''}</span>
+        <span class="txt">${esc(t.text)}${t.due ? `<em class="${late ? 'late' : ''}">${late ? 'kasni · ' : ''}${shortDate(t.due)}</em>` : ''}</span>
+        <button class="star ${t.star ? 'on' : ''}" data-star="1" aria-label="Top za danas">★</button></div>`;
+    };
+    const stars = L.todo.filter(t => t.star && !t.done).length;
+    body = `${addBar('Novi zadatak…')}
+      <div class="note" style="margin:-2px 0 10px">★ zvjezdica = <b>Top za danas</b> (prikaže se na početnom zaslonu)${stars > 3 ? ' · savjet: najviše 3 😉' : ''}</div>
+      <div class="card tight">${open.length ? open.map(row).join('') : emptyArt('', 'sve čisto', 'Dodaj zadatak gore.')}</div>
+      ${done.length ? `<div class="sec-head"><span class="section-title">Gotovo (${done.length})</span><button class="link-btn" id="liClear">Očisti</button></div>
+        <div class="card tight">${done.slice(-15).reverse().map(row).join('')}</div>` : ''}`;
+  }
+
+  if (seg === 'shop') {
+    const open = L.shop.filter(t => !t.done), done = L.shop.filter(t => t.done);
+    const freq = {}; (state.shopHistory || []).forEach(n => { const k = n.toLowerCase(); freq[k] = (freq[k] || 0) + 1; });
+    const openNames = new Set(open.map(t => t.text.toLowerCase()));
+    const sugg = Object.entries(freq).filter(([k]) => !openNames.has(k)).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([k]) => k);
+    const row = t => `<div class="li ${t.done ? 'done' : ''}" data-li="${t.id}"><span class="check ${t.done ? 'on' : ''}" data-tog="1">${t.done ? icon('check', 14, 3) : ''}</span><span class="txt">${esc(t.text)}</span><button class="star del" data-del="1" aria-label="Makni">✕</button></div>`;
+    body = `${addBar('Npr. mlijeko, kruh, jabuke…')}
+      ${sugg.length ? `<div class="chips sugg">${sugg.map(s => `<button class="chip" data-sugg="${esc(s)}">+ ${esc(s)}</button>`).join('')}</div>` : '<div class="note" style="margin:-2px 0 10px">Više stvari odjednom: odvoji zarezom. Ono što često kupuješ pojavit će se kao brzi gumbi.</div>'}
+      <div class="card tight">${open.length ? open.map(row).join('') : emptyArt('', 'popis je prazan', 'Dodaj što trebaš kupiti.')}</div>
+      ${done.length ? `<div class="sec-head"><span class="section-title">U košarici (${done.length})</span></div>
+        <div class="card tight">${done.map(row).join('')}</div>
+        <div class="actions"><button id="shopDone">${icon('wallet', 14, 2)} Gotova kupovina – upiši račun</button><button id="liClear">Očisti</button></div>` : ''}`;
+  }
+
+  if (seg === 'bucket') {
+    const open = L.bucket.filter(b => !b.done), done = L.bucket.filter(b => b.done);
+    const pct = L.bucket.length ? Math.round(done.length / L.bucket.length * 100) : 0;
+    const row = b => { const c = bucketCat(b.cat); return `<div class="li bucket ${b.done ? 'done' : ''}" data-li="${b.id}">
+      <span class="bemoji">${c.emoji}</span>
+      <span class="txt">${esc(b.text)}${b.done ? `<em>✓ ${shortDate(b.doneDate)}${b.note ? ' · ' + esc(b.note) : ''}</em>` : `<em>${c.name}</em>`}</span>
+      ${b.done ? '' : `<button class="mini-btn" data-bdone="1">Ostvareno</button>`}</div>`; };
+    body = `<div class="card bucket-hero"><div class="kicker">Bucket list</div><div class="big">${done.length}<span>/${L.bucket.length}</span></div>
+        <div class="progress"><span style="width:${pct}%;background:var(--orange)"></span></div><div class="note" style="margin:6px 0 0;color:rgba(255,255,255,.75)">${done.length ? `${pct} % ostvareno` : 'Što želiš doživjeti?'}</div></div>
+      ${addBar('Npr. vidjeti polarnu svjetlost…')}
+      <div class="chips" id="bCat">${BUCKET_CATS.map(c => `<button class="chip ${(ui.bucketCat || 'iskustvo') === c.id ? 'on' : ''}" data-bc="${c.id}">${c.emoji} ${c.name}</button>`).join('')}</div>
+      <div class="card tight" style="margin-top:10px">${open.length ? open.map(row).join('') : emptyArt('', 'sanjaj veliko', 'Putovanja, iskustva, stvari koje želiš naučiti…')}</div>
+      ${done.length ? `<div class="sec-head"><span class="section-title">Ostvareno 🎉</span></div><div class="card tight">${done.slice().reverse().map(row).join('')}</div>` : ''}`;
+  }
+
+  view.innerHTML = segHtml + body;
+  document.getElementById('lseg2').onclick = ev => { const b = ev.target.closest('[data-s]'); if (b) { ui.listSeg = b.dataset.s; render(); } };
+  const inp = document.getElementById('liAdd');
+  const add = () => {
+    const v = inp.value.trim(); if (!v) return;
+    if (seg === 'todo') L.todo.push({ id: uid(), text: v, done: false, star: false, created: todayStr() });
+    if (seg === 'shop') addShopItems(v);
+    if (seg === 'bucket') L.bucket.push({ id: uid(), text: v, cat: ui.bucketCat || 'iskustvo', done: false, created: todayStr() });
+    save(); render(); setTimeout(() => { const i = document.getElementById('liAdd'); if (i) i.focus(); }, 50);
+  };
+  document.getElementById('liAddB').onclick = add;
+  inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); add(); } };
+  const bc = document.getElementById('bCat'); if (bc) bc.onclick = ev => { const b = ev.target.closest('[data-bc]'); if (b) { ui.bucketCat = b.dataset.bc; render(); } };
+  view.querySelectorAll('[data-sugg]').forEach(b => b.onclick = () => { addShopItems(b.dataset.sugg); save(); render(); });
+  const clr = document.getElementById('liClear'); if (clr) clr.onclick = () => { L[seg] = L[seg].filter(t => !t.done); save(); render(); };
+  const sd = document.getElementById('shopDone'); if (sd) sd.onclick = () => {
+    const names = L.shop.filter(t => t.done).map(t => t.text);
+    L.shop = L.shop.filter(t => !t.done); save();
+    openTxSheet(null, 'out');
+    setTimeout(() => { const n = document.getElementById('f-note'); if (n) n.value = 'Kupovina: ' + names.slice(0, 4).join(', ') + (names.length > 4 ? '…' : ''); }, 50);
+  };
+  view.querySelectorAll('[data-li]').forEach(el => el.onclick = ev => {
+    const t = L[seg].find(x => x.id === el.dataset.li); if (!t) return;
+    if (ev.target.closest('[data-star]')) { t.star = !t.star; save(); render(); return; }
+    if (ev.target.closest('[data-del]')) { L[seg] = L[seg].filter(x => x.id !== t.id); save(); render(); return; }
+    if (ev.target.closest('[data-bdone]')) { openBucketDoneSheet(t); return; }
+    if (ev.target.closest('[data-tog]')) { toggleListItem(t); save(); render(); return; }
+    openListItemSheet(seg, t);
+  });
+}
+function addShopItems(v) {
+  const L = listsInit();
+  state.shopHistory ||= [];
+  v.split(/,|\si\s|\n/).map(x => x.trim()).filter(Boolean).forEach(n => {
+    const name = n.charAt(0).toUpperCase() + n.slice(1);
+    if (!L.shop.some(t => !t.done && t.text.toLowerCase() === name.toLowerCase())) L.shop.push({ id: uid(), text: name, done: false });
+    state.shopHistory.push(name); if (state.shopHistory.length > 300) state.shopHistory.shift();
+  });
+}
+function openListItemSheet(seg, t) {
+  const L = listsInit();
+  openSheet(seg === 'todo' ? 'Zadatak' : seg === 'shop' ? 'Stavka' : 'Bucket list', `
+    <div class="field"><label>Tekst</label><input id="f-text" value="${esc(t.text)}" autocomplete="off"></div>
+    ${seg === 'todo' ? `<div class="field"><label>Rok (neobavezno)</label><input id="f-due" type="date" value="${t.due || ''}"></div>` : ''}
+    ${seg === 'bucket' ? `<div class="field"><label>Kategorija</label><div class="chips" id="f-bc">${BUCKET_CATS.map(c => `<button class="chip ${t.cat === c.id ? 'on' : ''}" data-bc="${c.id}">${c.emoji} ${c.name}</button>`).join('')}</div></div>` : ''}
+    <button class="btn" id="f-save">Spremi</button><button class="btn danger" id="f-del">Obriši</button>`);
+  let cat = t.cat;
+  const fbc = document.getElementById('f-bc'); if (fbc) fbc.onclick = ev => { const b = ev.target.closest('[data-bc]'); if (!b) return; cat = b.dataset.bc; fbc.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); };
+  document.getElementById('f-save').onclick = () => {
+    const v = document.getElementById('f-text').value.trim(); if (!v) return toast('Upiši tekst');
+    t.text = v; if (seg === 'todo') t.due = document.getElementById('f-due').value || null; if (seg === 'bucket') t.cat = cat;
+    save(); closeSheet(); render();
+  };
+  document.getElementById('f-del').onclick = () => { L[seg] = L[seg].filter(x => x.id !== t.id); save(); closeSheet(); render(); };
+}
+function openBucketDoneSheet(b) {
+  openSheet(`🎉 ${b.text}`, `
+    <div class="field"><label>Kada?</label><input id="f-date" type="date" value="${todayStr()}"></div>
+    <div class="field"><label>Kako je bilo? (neobavezno)</label><input id="f-note" placeholder="jedna rečenica za uspomenu" autocomplete="off"></div>
+    <label style="display:flex;gap:10px;align-items:center;margin:0 0 14px"><input type="checkbox" id="f-mom" checked style="width:20px;height:20px"> <span>Dodaj i u Moments</span></label>
+    <button class="btn" id="f-ok">Ostvareno!</button>`);
+  document.getElementById('f-ok').onclick = () => {
+    b.done = true; b.doneDate = document.getElementById('f-date').value || todayStr(); b.note = document.getElementById('f-note').value.trim();
+    if (document.getElementById('f-mom').checked) state.moments.push({ id: uid(), created: Date.now(), wish: false, tag: b.cat === 'putovanje' ? 'putovanje' : 'ostalo', text: b.text + (b.note ? ' — ' + b.note : ''), date: b.doneDate, rating: 5 });
+    save(); closeSheet(); render(); toast('🎉 Bravo! Još jedna s liste.');
+  };
 }
 
 /* ===================== CASH FLOW – detaljno ===================== */
@@ -2905,7 +3111,7 @@ backBtn.onclick = () => {
   else if (ui.course) ui.course = null;
   else if (ui.project) ui.project = null;
   else if (ui.cashflow) ui.cashflow = false;
-  else if (ui.tab === 'postavke' || ui.tab === 'moments') ui.tab = 'home';
+  else if (ui.tab === 'postavke' || ui.tab === 'moments' || ui.tab === 'liste') ui.tab = 'home';
   window.scrollTo(0, 0); render();
 };
 fab.onclick = () => {
