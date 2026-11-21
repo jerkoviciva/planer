@@ -400,6 +400,22 @@
 .bucket-hero .kicker{color:var(--orange)}
 .bucket-hero .big{font-family:'Bodoni Moda',serif;font-size:54px;line-height:1;margin:6px 0 10px}
 .bucket-hero .big span{font-size:26px;opacity:.6}
+.price-btn{border:1px solid var(--ink);background:none;color:inherit;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;padding:4px 6px}
+
+.verse .liturgy{position:relative;font-size:13px;line-height:1.45;margin-top:10px;color:#F6EFE6;opacity:.92}
+.verse .liturgy .sep{margin:0 6px;opacity:.5}
+.verse .v-reflect{display:none;margin-top:14px;padding-top:12px;border-top:1px solid rgba(246,239,230,.25);font-size:15px;line-height:1.5}
+.verse .v-reflect.open{display:block}
+.verse .v-reflect p{margin:0 0 8px}
+.verse .v-reflect .q{font-family:'Bodoni Moda',serif;font-style:italic;font-size:17px;color:#FFD2B0}
+.verse .v-actions{display:flex;gap:8px;margin-top:12px}
+.verse .v-actions button{flex:1;padding:10px;border:1px solid rgba(246,239,230,.4);background:rgba(21,23,53,.35);color:#F6EFE6;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.mood-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.mood-verse{padding:16px;background:var(--night);color:#F6EFE6}
+.mood-verse blockquote{margin:0 0 8px;font-family:'Bodoni Moda',serif;font-style:italic;font-size:20px;line-height:1.35}
+.mood-verse .v-ref{font-family:'Space Mono',monospace;font-size:12px;text-transform:uppercase;opacity:.8;margin-bottom:10px}
+.mood-verse p{margin:0 0 6px;font-size:15px;line-height:1.5;opacity:.9}
+.mood-verse .mini-btn{border-color:rgba(246,239,230,.5);color:#F6EFE6}
 </style>
 </head>
 <body>
@@ -906,6 +922,178 @@ function verseOfDay(dateStr, shift) {
   return { i, text: VERSES[i][0], ref: VERSES[i][1] };
 }
 
+/* ===================== VJERA: razmišljanje, raspoloženje, liturgijsko vrijeme ===================== */
+const REFLECT = [
+  ['Danas ne moraš imati sve riješeno. Pastir vodi korak po korak.', 'Gdje danas trebaš povjerovati da ti ništa neće nedostajati?'],
+  ['Snaga ne dolazi iz toga da sve nosiš sama, nego iz toga na koga se oslanjaš.', 'Koja te stvar danas plaši – i možeš li je predati?'],
+  ['Tvoji planovi su važni, ali Božji su širi i puni mira.', 'Čemu se nadaš za svoju budućnost?'],
+  ['Razum je dar, ali nije sve. Povjerenje ide dalje od onoga što razumiješ.', 'Gdje se previše oslanjaš samo na svoje proračune?'],
+  ['Ne moraš znati cijeli put – dovoljno je da ga ne ideš sama.', 'U kojoj odluci danas možeš zastati i pomoliti se?'],
+  ['Strah je stvaran, ali nije zadnja riječ. On je s tobom.', 'Čega se bojiš ovaj tjedan?'],
+  ['Ljubav nije osjećaj nego način postupanja – strpljivo i dobro.', 'Prema kome danas možeš biti strpljivija?'],
+  ['Kad sve drugo prođe, ostaje ljubav.', 'Što danas radiš iz ljubavi, a ne iz obaveze?'],
+  ['Umor nije slabost. Pozvana si da se odmoriš, ne samo da izdržiš.', 'Što ti danas može donijeti stvarni odmor?'],
+  ['Mir počinje kad stanemo. Samo minutu.', 'Možeš li danas odvojiti pet minuta tišine?'],
+  ['Kad je on svjetlo, tama nema posljednju riječ.', 'Koja te sjena trenutno prati?'],
+  ['Ne kaže da je sve dobro – nego da Bog i od teškog može izvući dobro.', 'Što ti je teško, a možda te nečemu uči?'],
+  ['Brige nisu za skupljanje. Predaj ih jednu po jednu.', 'Koju brigu danas možeš predati?'],
+  ['Molitva sa zahvalnošću mijenja pogled na problem.', 'Za koje tri stvari si danas zahvalna?'],
+  ['Mir koji ne ovisi o okolnostima čuva i srce i misli.', 'Gdje ti danas treba taj mir?'],
+  ['Ovaj dan je dar – i običan dan je dar.', 'Što lijepo možeš primijetiti danas?'],
+  ['Svako jutro je nova prilika. Jučerašnje greške ne određuju danas.', 'Što danas možeš započeti ispočetka?'],
+  ['Snaga se obnavlja – ne odjednom, nego dok se uzdaš.', 'Gdje osjećaš da ti ponestaje snage?'],
+  ['Mir koji Isus daje nije kao mir svijeta – ne ovisi o tome da je sve posloženo.', 'Što te danas uznemiruje?'],
+  ['Kad se izgubiš, on je put. Kad sumnjaš, on je istina.', 'Na kojem raskrižju trenutno stojiš?'],
+  ['Ne moraš vidjeti cijeli put – dovoljno je svjetlo za sljedeći korak.', 'Koji je tvoj sljedeći mali korak?'],
+  ['Ljubljena si prije nego što si išta napravila.', 'Vjeruješ li da si voljena i kad ne uspiješ?'],
+  ['Bog nije umoran od tvojih molitava. Smiješ tražiti, i opet.', 'Što danas želiš tražiti od Boga?'],
+  ['Kad je on na prvom mjestu, ostalo dođe na svoje mjesto.', 'Što ti je trenutno na prvom mjestu?'],
+  ['Današnji dan ima dovoljno svojega. Sutra će se brinuti za sebe.', 'Čega se brineš unaprijed?'],
+  ['Tvoja dobrota i trud svijetle i kad misliš da nitko ne vidi.', 'Kome danas možeš biti svjetlo?'],
+  ['Ni u jednom danu nisi sama.', 'Kad si se zadnji put osjećala usamljeno – a nisi bila?'],
+  ['Ono što se tebi čini nemoguće, Bogu nije.', 'Koju si nadu odustala nositi?'],
+  ['Marija je povjerovala prije nego je vidjela.', 'Kojem obećanju danas trebaš vjerovati?'],
+  ['Hrabrost nije odsutnost straha – nego znanje da ne ideš sama.', 'Gdje ti danas treba hrabrosti?'],
+  ['Blagoslov je i za tebe, danas, baš ovakvu kakva jesi.', 'Koga danas možeš blagosloviti riječju ili djelom?'],
+  ['Neke bitke nisu tvoje da ih biješ. Smiješ biti mirna.', 'Što pokušavaš kontrolirati, a ne možeš?'],
+  ['Nova pjesma – novi pogled na stari dan.', 'Za što danas možeš zahvaliti pjesmom ili osmijehom?'],
+  ['Riječ ne osvjetljava cijelu cestu, nego dovoljno za tvoje noge.', 'Koju odluku trebaš donijeti?'],
+  ['Pomoć ne dolazi s brda, nego od Onoga koji je stvorio brda.', 'Od koga očekuješ pomoć – i od Koga je možeš tražiti?'],
+  ['Čuvan je i odlazak na posao i povratak kući.', 'Gdje danas trebaš osjećaj sigurnosti?'],
+  ['Čisto srce nije savršeno srce, nego obnovljeno.', 'Što bi htjela ostaviti iza sebe?'],
+  ['Prepustiti ne znači odustati, nego surađivati.', 'Što možeš prepustiti, a nastaviti raditi svoj dio?'],
+  ['Kad se radost nađe u Bogu, i želje se mijenjaju.', 'Što ti srce stvarno želi?'],
+  ['Kad je srce slomljeno, Bog nije daleko – nego blizu.', 'Što te boli, a nisi nikome rekla?'],
+  ['Dobrota se ne razumije samo glavom – kuša se.', 'Gdje si danas osjetila Božju dobrotu?'],
+  ['Zaklon nije bijeg, nego mjesto gdje se skupi snaga.', 'Gdje ti je danas potreban zaklon?'],
+  ['Stvorena si s namjerom i ljepotom.', 'Što na sebi danas možeš prihvatiti s ljubavlju?'],
+  ['Rane se liječe polako, ali se liječe.', 'Što u tebi još zacjeljuje?'],
+  ['Postoji vrijeme za rad i vrijeme za odmor. Ne mora sve sada.', 'U kojem si vremenu ti sada?'],
+  ['Ono što još nije lijepo možda samo nije njegovo vrijeme.', 'Čemu trebaš dati vremena?'],
+  ['Ono što pustiš u srce oblikuje tvoj život.', 'Što danas puštaš u svoje srce?'],
+  ['Kad mu predaš djela, i planovi dobiju smjer.', 'Koji plan danas želiš predati?'],
+  ['Ti planiraš, on vodi korake – i to je olakšanje, ne gubitak.', 'Jesi li spremna da te vodi drukčije nego što si planirala?'],
+  ['Snaga i dostojanstvo – i osmijeh prema budućnosti.', 'Kako bi izgledalo da se danas ne bojiš sutrašnjice?'],
+  ['Zove te imenom. Pripadaš.', 'Gdje se osjećaš kao da ne pripadaš?'],
+  ['Ne obećava da neće biti voda – nego da će biti s tobom u njima.', 'Kroz što trenutno prolaziš?'],
+  ['Nešto novo već raste, čak i ako se još ne vidi.', 'Što novo osjećaš da počinje u tvom životu?'],
+  ['I kad se sve trese, njegova ljubav ostaje.', 'Što se u tvom životu trenutno trese?'],
+  ['Bog se raduje tebi – ne samo podnosi te.', 'Kako bi se osjećala da vjeruješ da se raduje tebi?'],
+  ['Radost nije nagrada za savršen dan, nego snaga za svaki dan.', 'Gdje danas možeš izabrati radost?'],
+  ['Nada, strpljenje, molitva – tri malena koraka za težak dan.', 'Koji od ta tri ti danas najviše treba?'],
+  ['Dobrota je jača nego što izgleda.', 'Kome danas možeš uzvratiti dobrim?'],
+  ['Kad je on uz tebe, ništa nije presudno protiv tebe.', 'Što ti se čini nepobjedivo?'],
+  ['Ništa – ni greška, ni strah, ni udaljenost – ne odvaja od njegove ljubavi.', 'Što misliš da te odvaja od Boga?'],
+  ['Nada nije naivnost, nego mir koji se nosi kroz vjeru.', 'Čemu se danas nadaš?'],
+  ['Slabost nije kraj priče. Tamo se vidi milost.', 'Gdje se osjećaš slabo?'],
+  ['Staro je prošlo. Smiješ biti nova.', 'Što staro još nosiš sa sobom?'],
+  ['Ne moraš sve vidjeti da bi išla naprijed.', 'Gdje danas hodaš u vjeri?'],
+  ['Plodovi rastu polako, iz povezanosti.', 'Koji plod Duha ti danas najviše treba?'],
+  ['Trud koji se ne vidi nije uzaludan. Žetva dolazi.', 'Gdje se osjećaš umorno od činjenja dobra?'],
+  ['Milost je dar – ne nešto što zarađuješ.', 'Gdje si prestroga prema sebi?'],
+  ['Opraštanje oslobađa prije svega tebe.', 'Kome trebaš oprostiti – možda i sebi?'],
+  ['Bog ne ostavlja posao napola. Ni tebe.', 'Što u sebi vidiš kao „nedovršeno”?'],
+  ['Radost nije samo za lijepe dane.', 'Za što se danas možeš radovati?'],
+  ['I posao, i faks, i kućanski poslovi – sve može biti od srca.', 'Što danas možeš napraviti od srca?'],
+  ['Ljubav drži sve na okupu.', 'Kako danas možeš „obući” ljubav?'],
+  ['Radovati se, moliti, zahvaljivati – u svemu, ne samo za sve.', 'Za što danas možeš zahvaliti iako je teško?'],
+  ['Strah nije od Boga. Snaga, ljubav i mudrost jesu.', 'Gdje ti treba hrabrosti i razboritosti?'],
+  ['Vjera vidi ono što oči još ne vide.', 'Čemu se nadaš, a još ne vidiš?'],
+  ['Sve se mijenja, on ostaje isti.', 'Što ti treba biti stalno u ovom razdoblju promjena?'],
+  ['Mudrost se smije tražiti – i dobiva se obilno.', 'Za koju odluku trebaš mudrost?'],
+  ['Prvi korak je tvoj – i on ga dočekuje.', 'Kako se danas možeš malo približiti Bogu?'],
+  ['Strah i ljubav ne stanuju dugo zajedno.', 'Koji strah danas možeš zamijeniti povjerenjem?'],
+  ['Gdje je ljubav, ondje je i Bog.', 'Gdje si danas vidjela ljubav?'],
+  ['Ljubiš jer si prva ljubljena.', 'Kako bi se odnosila prema sebi da vjeruješ da si ljubljena?'],
+  ['On kuca – ne razbija vrata. Čeka tebe.', 'Što te sprječava da mu otvoriš?'],
+  ['Svaka suza je viđena.', 'Za čim tuguješ?'],
+  ['Sve novo – i tvoji dani, i tvoje srce.', 'Što bi voljela da bude novo?'],
+  ['Vjernost se vidi u tome da ostaneš.', 'Kome si danas vjerna i zahvalna?'],
+  ['Možda si baš ovdje, baš sada, s razlogom.', 'Zašto si možda upravo ovdje gdje jesi?'],
+  ['Bog gleda srce, ne savršen izgled ni uspjeh.', 'Što bi Bog danas vidio u tvom srcu?'],
+  ['Poznavao te je prije nego si postala.', 'Vjeruješ li da tvoj život ima smisao?'],
+  ['Korijen uz vodu ne boji se suše.', 'Iz čega danas piješ snagu?'],
+  ['Zazovi – on odgovara.', 'Što danas želiš reći Bogu?'],
+];
+const MOODS = [
+  { id: 'zabrinuta', label: '😟 Zabrinuta', refs: ['1 Petrova 5,7', 'Filipljanima 4,6', 'Matej 6,34', 'Izaija 41,10', 'Psalam 46,11'] },
+  { id: 'umorna', label: '😮‍💨 Umorna', refs: ['Matej 11,28', 'Izaija 40,31', 'Galaćanima 6,9', '2 Korinćanima 12,9', 'Psalam 23,1'] },
+  { id: 'tuzna', label: '😢 Tužna', refs: ['Psalam 34,19', 'Psalam 147,3', 'Otkrivenje 21,4', 'Tužaljke 3,22-23', 'Izaija 54,10'] },
+  { id: 'uplasena', label: '😨 Uplašena', refs: ['Jošua 1,9', 'Psalam 27,1', '2 Timoteju 1,7', 'Izaija 43,1', '1 Ivanova 4,18'] },
+  { id: 'usamljena', label: '🫂 Usamljena', refs: ['Matej 28,20', 'Izaija 43,2', 'Sefanija 3,17', 'Rimljanima 8,39', 'Jakovljeva 4,8'] },
+  { id: 'bezmot', label: '🫠 Bez motivacije', refs: ['Kološanima 3,23', 'Filipljanima 4,13', 'Filipljanima 1,6', 'Nehemija 8,10', 'Psalam 118,24'] },
+  { id: 'nesigurna', label: '🤔 Ne znam što dalje', refs: ['Mudre izreke 3,5', 'Mudre izreke 16,9', 'Psalam 119,105', 'Jakovljeva 1,5', 'Jeremija 29,11'] },
+  { id: 'ljuta', label: '😤 Ljuta', refs: ['Efežanima 4,32', 'Rimljanima 12,21', '1 Korinćanima 13,4', 'Izlazak 14,14', 'Mudre izreke 4,23'] },
+  { id: 'zahvalna', label: '🙏 Zahvalna', refs: ['1 Solunjanima 5,16-18', 'Psalam 96,1', 'Psalam 34,9', 'Filipljanima 4,4', 'Psalam 139,14'] },
+];
+const verseByRef = r => { const i = VERSES.findIndex(v => v[1] === r); return i >= 0 ? { i, text: VERSES[i][0], ref: r } : null; };
+
+/* Liturgijska godina */
+function easterDate(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31), day = ((h + l - 7 * m + 114) % 31) + 1;
+  return ymd(new Date(y, month - 1, day));
+}
+function adventStart(y) { const xmas = new Date(y, 11, 25); const wd = xmas.getDay(); return ymd(new Date(y, 11, 25 - (wd === 0 ? 7 : wd) - 21)); }
+function feastsOf(y) {
+  const E = easterDate(y), f = (d, n) => ({ d, n });
+  return [
+    f(`${y}-01-01`, 'Sveta Marija Bogorodica'), f(`${y}-01-06`, 'Bogojavljenje (Sveta tri kralja)'), f(`${y}-02-02`, 'Svijećnica'),
+    f(addDays(E, -46), 'Pepelnica – početak Korizme'), f(`${y}-03-25`, 'Blagovijest'), f(addDays(E, -7), 'Cvjetnica'),
+    f(addDays(E, -3), 'Veliki četvrtak'), f(addDays(E, -2), 'Veliki petak'), f(addDays(E, -1), 'Velika subota'),
+    f(E, 'Uskrs'), f(addDays(E, 1), 'Uskrsni ponedjeljak'), f(addDays(E, 39), 'Uzašašće'), f(addDays(E, 49), 'Duhovi'),
+    f(addDays(E, 60), 'Tijelovo'), f(`${y}-08-15`, 'Velika Gospa'), f(`${y}-11-01`, 'Svi sveti'), f(`${y}-11-02`, 'Dušni dan'),
+    f(adventStart(y), '1. nedjelja Adventa'), f(`${y}-12-08`, 'Bezgrešno začeće BDM'), f(`${y}-12-24`, 'Badnjak'),
+    f(`${y}-12-25`, 'Božić'), f(`${y}-12-26`, 'Sveti Stjepan'),
+  ];
+}
+function liturgyToday() {
+  const t = todayStr(), y = parseYmd(t).getFullYear();
+  const feasts = [...feastsOf(y), ...feastsOf(y + 1)];
+  const today = feasts.find(x => x.d === t);
+  const next = feasts.filter(x => x.d > t).sort((a, b) => a.d.localeCompare(b.d))[0];
+  const E = easterDate(y), adv = adventStart(y), ash = addDays(E, -46), pent = addDays(E, 49);
+  let season = null;
+  if (t >= adv && t <= `${y}-12-24`) {
+    const week = Math.floor(daysUntil(adv) * -1 / 7) + 1, left = daysUntil(`${y}-12-25`);
+    season = { name: `${week}. tjedan Adventa`, icon: '🕯️'.repeat(Math.min(4, week)), extra: left === 1 ? 'sutra je Božić' : `još ${left} ${plural(left, 'dan', 'dana', 'dana')} do Božića`, color: '#8A5BD6' };
+  } else if (t >= `${y}-12-25` || t <= `${y}-01-12`) season = { name: 'Božićno vrijeme', icon: '⭐', extra: '', color: '#E8C35A' };
+  else if (t >= ash && t < E) { const left = daysUntil(E); season = { name: 'Korizma', icon: '✝️', extra: `još ${left} ${plural(left, 'dan', 'dana', 'dana')} do Uskrsa`, color: '#8A5BD6' }; }
+  else if (t >= E && t <= pent) season = { name: 'Vazmeno vrijeme', icon: '🕊️', extra: `do Duhova ${daysUntil(pent)} ${plural(daysUntil(pent), 'dan', 'dana', 'dana')}`, color: '#E8C35A' };
+  const sunday = parseYmd(t).getDay() === 0;
+  return { today, next, season, sunday };
+}
+function liturgyLine() {
+  if (state.settings.hideLiturgy) return '';
+  const L = liturgyToday();
+  const bits = [];
+  if (L.today) bits.push(`<b>${esc(L.today.n)}</b>`);
+  else if (L.sunday) bits.push('<b>Nedjelja</b> · dan Gospodnji');
+  if (L.season) bits.push(`${L.season.icon} ${L.season.name}${L.season.extra ? ' · ' + L.season.extra : ''}`);
+  if (!L.today && L.next && daysUntil(L.next.d) <= 7) bits.push(`${esc(L.next.n)} ${daysUntil(L.next.d) === 1 ? 'sutra' : 'za ' + daysUntil(L.next.d) + ' dana'}`);
+  return bits.length ? `<div class="liturgy">${bits.join('<span class="sep">·</span>')}</div>` : '';
+}
+function openMoodSheet() {
+  openSheet('Kako si danas?', `
+    <div class="mood-grid">${MOODS.map(m => `<button class="chip" data-mood="${m.id}">${m.label}</button>`).join('')}</div>
+    <div id="moodOut"></div>`);
+  sheet.querySelectorAll('[data-mood]').forEach(b => b.onclick = () => {
+    const m = MOODS.find(x => x.id === b.dataset.mood);
+    sheet.querySelectorAll('[data-mood]').forEach(x => x.classList.toggle('on', x === b));
+    const pick = m.refs[Math.floor(Math.random() * m.refs.length)];
+    const v = verseByRef(pick); if (!v) return;
+    const r = REFLECT[v.i];
+    const fav = (state.favVerses || []).includes(v.ref);
+    document.getElementById('moodOut').innerHTML = `<div class="mood-verse">
+      <blockquote>„${esc(v.text)}”</blockquote><div class="v-ref">${esc(v.ref)}</div>
+      ${r ? `<p>${esc(r[0])}</p>` : ''}
+      <div class="fund-btns"><button class="mini-btn" id="moodAgain">Drugi stih</button><button class="mini-btn ${fav ? 'hot' : ''}" id="moodFav">${fav ? '♥ Spremljeno' : '♡ Spremi'}</button></div></div>`;
+    document.getElementById('moodAgain').onclick = () => b.click();
+    document.getElementById('moodFav').onclick = () => { state.favVerses ||= []; if (!state.favVerses.includes(v.ref)) state.favVerses.push(v.ref); save(); toast('Stih spremljen ♥'); document.getElementById('moodFav').textContent = '♥ Spremljeno'; };
+  });
+}
+
 function verseHtml() {
   if (state.settings.hideVerse) return '';
   const v = verseOfDay(todayStr(), ui.verseShift || 0);
@@ -915,6 +1103,7 @@ function verseHtml() {
       <div class="v-photo" style="background-image:url('https://images.unsplash.com/photo-1760857224786-15621b02ea64?w=800&q=70&auto=format&fit=crop')"></div>
       <div class="v-inner">
         <div class="kicker">■ Riječ za danas</div>
+        ${liturgyLine()}
         <blockquote>„${esc(v.text)}”</blockquote>
         <div class="v-foot">
           <span class="v-ref">${esc(v.ref)}</span>
@@ -922,6 +1111,14 @@ function verseHtml() {
             <button id="vFav" aria-label="Spremi stih" class="${fav ? 'on' : ''}">${icon('heart', 18, 1.8)}</button>
             <button id="vNext" aria-label="Drugi stih">${icon('refresh-cw', 18, 1.8)}</button>
           </span>
+        </div>
+        ${REFLECT[v.i] ? `<div class="v-reflect ${ui.reflectOpen ? 'open' : ''}" id="vReflect">
+          <p>${esc(REFLECT[v.i][0])}</p>
+          <p class="q">${esc(REFLECT[v.i][1])}</p>
+        </div>` : ''}
+        <div class="v-actions">
+          <button id="vThink">${ui.reflectOpen ? 'Sakrij' : 'Razmisli'} ${ui.reflectOpen ? '↑' : '↓'}</button>
+          <button id="vMood">Kako si danas?</button>
         </div>
       </div>
     </div>`;
@@ -931,6 +1128,8 @@ function bindVerse() {
   const c = document.getElementById('verseCard');
   if (!c) return;
   document.getElementById('vNext').onclick = () => { ui.verseShift = (ui.verseShift || 0) + 1; c.outerHTML = verseHtml(); bindVerse(); };
+  document.getElementById('vThink').onclick = () => { ui.reflectOpen = !ui.reflectOpen; document.getElementById('verseCard').outerHTML = verseHtml(); bindVerse(); };
+  document.getElementById('vMood').onclick = openMoodSheet;
   document.getElementById('vFav').onclick = () => {
     const v = verseOfDay(todayStr(), ui.verseShift || 0);
     state.favVerses = state.favVerses || [];
@@ -1752,7 +1951,7 @@ function renderLists() {
     const freq = {}; (state.shopHistory || []).forEach(n => { const k = n.toLowerCase(); freq[k] = (freq[k] || 0) + 1; });
     const openNames = new Set(open.map(t => t.text.toLowerCase()));
     const sugg = Object.entries(freq).filter(([k]) => !openNames.has(k)).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([k]) => k);
-    const row = t => `<div class="li ${t.done ? 'done' : ''}" data-li="${t.id}"><span class="check ${t.done ? 'on' : ''}" data-tog="1">${t.done ? icon('check', 14, 3) : ''}</span><span class="txt">${esc(t.text)}</span><button class="star del" data-del="1" aria-label="Makni">✕</button></div>`;
+    const row = t => `<div class="li ${t.done ? 'done' : ''}" data-li="${t.id}"><span class="check ${t.done ? 'on' : ''}" data-tog="1">${t.done ? icon('check', 14, 3) : ''}</span><span class="txt">${esc(t.text)}</span>${t.done ? '' : `<button class="price-btn" data-price="1" aria-label="Usporedi cijene">€?</button>`}<button class="star del" data-del="1" aria-label="Makni">✕</button></div>`;
     body = `${addBar('Npr. mlijeko, kruh, jabuke…')}
       ${sugg.length ? `<div class="chips sugg">${sugg.map(s => `<button class="chip" data-sugg="${esc(s)}">+ ${esc(s)}</button>`).join('')}</div>` : '<div class="note" style="margin:-2px 0 10px">Više stvari odjednom: odvoji zarezom. Ono što često kupuješ pojavit će se kao brzi gumbi.</div>'}
       <div class="card tight">${open.length ? open.map(row).join('') : emptyArt('', 'popis je prazan', 'Dodaj što trebaš kupiti.')}</div>
@@ -1780,7 +1979,7 @@ function renderLists() {
   document.getElementById('lseg2').onclick = ev => { const b = ev.target.closest('[data-s]'); if (b) { ui.listSeg = b.dataset.s; render(); } };
   const inp = document.getElementById('liAdd');
   const add = () => {
-    const v = inp.value.trim(); if (!v) return;
+    const v = inp.value.trim(); if (!v) { inp.focus(); return toast(seg === 'bucket' ? 'Prvo upiši što želiš doživjeti ✍️' : 'Prvo upiši tekst ✍️'); }
     if (seg === 'todo') L.todo.push({ id: uid(), text: v, done: false, star: false, created: todayStr() });
     if (seg === 'shop') addShopItems(v);
     if (seg === 'bucket') L.bucket.push({ id: uid(), text: v, cat: ui.bucketCat || 'iskustvo', done: false, created: todayStr() });
@@ -1801,10 +2000,19 @@ function renderLists() {
     const t = L[seg].find(x => x.id === el.dataset.li); if (!t) return;
     if (ev.target.closest('[data-star]')) { t.star = !t.star; save(); render(); return; }
     if (ev.target.closest('[data-del]')) { L[seg] = L[seg].filter(x => x.id !== t.id); save(); render(); return; }
+    if (ev.target.closest('[data-price]')) { comparePrice(t.text); return; }
     if (ev.target.closest('[data-bdone]')) { openBucketDoneSheet(t); return; }
     if (ev.target.closest('[data-tog]')) { toggleListItem(t); save(); render(); return; }
     openListItemSheet(seg, t);
   });
+}
+function comparePrice(name) {
+  try { navigator.clipboard && navigator.clipboard.writeText(name); } catch (e) {}
+  openSheet(`Usporedi: ${name}`, `
+    <div class="note" style="margin:0 0 12px">Naziv <b style="color:var(--ink)">„${esc(name)}”</b> je kopiran – na stranici ga samo zalijepi u tražilicu (ili skeniraj barkod u trgovini).</div>
+    <a class="btn" href="https://www.index.hr/cijene" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">Index Cijene ↗</a>
+    <a class="btn ghost" href="https://usporedicijene.info" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin-top:8px">Usporedi cijene ↗</a>
+    <div class="note" style="margin:12px 0 0">Savjet: gledaj <b style="color:var(--ink)">cijenu po litri / kg / pranju</b>, ne cijenu pakiranja. Drogerije (DM, Müller) često nisu u usporedbi – provjeri njihove aplikacije za kupone.</div>`);
 }
 function addShopItems(v) {
   const L = listsInit();
@@ -3007,6 +3215,7 @@ function renderSettings() {
         <button data-v="on" class="${state.settings.hideVerse ? '' : 'on'}">Prikaži</button>
         <button data-v="off" class="${state.settings.hideVerse ? 'on' : ''}">Sakrij</button>
       </div>
+      <label style="display:flex;gap:10px;align-items:center;margin:12px 0 0"><input type="checkbox" id="litOn" ${state.settings.hideLiturgy ? '' : 'checked'} style="width:20px;height:20px"> <span>Prikaži liturgijsko vrijeme (Advent, blagdani, nedjelje)</span></label>
       <button class="btn ghost" id="favVerses" style="margin-top:10px">Spremljeni stihovi (${(state.favVerses || []).length})</button>
     </div>
 
@@ -3048,6 +3257,7 @@ function renderSettings() {
   `;
   document.getElementById('verseSeg').onclick = ev => { const b = ev.target.closest('[data-v]'); if (b) { state.settings.hideVerse = b.dataset.v === 'off'; save(); render(); } };
   document.getElementById('favVerses').onclick = openFavVerses;
+  document.getElementById('litOn').onchange = e => { state.settings.hideLiturgy = !e.target.checked; save(); };
   document.getElementById('themeSeg').onclick = ev => { const b = ev.target.closest('[data-th]'); if (b) { setTheme(b.dataset.th); render(); } };
   const pinSet = document.getElementById('pinSet');
   if (pinSet) pinSet.onclick = () => { const v = document.getElementById('pinNew').value; if (!/^\d{4,6}$/.test(v)) return toast('PIN mora imati 4–6 brojeva'); state.settings.pin = hashPin(v); save(); render(); toast('PIN postavljen 🔒'); };
