@@ -400,6 +400,18 @@
 .bucket-hero .kicker{color:var(--orange)}
 .bucket-hero .big{font-family:'Bodoni Moda',serif;font-size:54px;line-height:1;margin:6px 0 10px}
 .bucket-hero .big span{font-size:26px;opacity:.6}
+.price-btn.guess{border-style:dashed;opacity:.8}
+.price-btn.set{background:var(--ink);color:var(--bg)}
+.li.wait .txt{opacity:.7}
+.shop-sum{margin-bottom:12px}
+.shop-sum .big{font-family:'Bodoni Moda',serif;font-size:40px;line-height:1.05;margin:4px 0 8px}
+.ss-rows div{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-top:1px solid var(--line, rgba(0,0,0,.1))}
+.ss-rows div.tot{font-weight:700}
+.ss-rows b{font-family:'Space Mono',monospace;font-size:13px}
+.ss-rows b.neg{color:var(--orange)}
+.qty{display:flex;align-items:center;gap:14px}
+.qty button{width:44px;height:44px;border:1.5px solid var(--ink);background:none;color:inherit;font-size:22px}
+.qty b{font-size:20px;min-width:28px;text-align:center}
 .price-btn{border:1px solid var(--ink);background:none;color:inherit;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;padding:4px 6px}
 
 .verse .liturgy{position:relative;font-size:13px;line-height:1.45;margin-top:10px;color:#F6EFE6;opacity:.92}
@@ -1895,7 +1907,7 @@ function listsInit() { state.lists ||= { todo: [], shop: [], bucket: [] }; for (
 
 function listsStrip() {
   const L = listsInit();
-  const todoOpen = L.todo.filter(t => !t.done).length, shopOpen = L.shop.filter(t => !t.done).length;
+  const todoOpen = L.todo.filter(t => !t.done).length, shopOpen = L.shop.filter(t => !t.done && t.prio !== 'next').length;
   const bDone = L.bucket.filter(b => b.done).length;
   return `<div class="lists-strip">
     <button data-list="todo"><span>☑︎</span><b>To-do</b><i>${todoOpen ? `${todoOpen} otvoreno` : 'prazno'}</i></button>
@@ -1947,17 +1959,38 @@ function renderLists() {
   }
 
   if (seg === 'shop') {
-    const open = L.shop.filter(t => !t.done), done = L.shop.filter(t => t.done);
+    const open = L.shop.filter(t => !t.done && t.prio !== 'next'), later = L.shop.filter(t => !t.done && t.prio === 'next'), done = L.shop.filter(t => t.done);
+    open.sort((a, b) => (a.prio === 'wait' ? 1 : 0) - (b.prio === 'wait' ? 1 : 0));
     const freq = {}; (state.shopHistory || []).forEach(n => { const k = n.toLowerCase(); freq[k] = (freq[k] || 0) + 1; });
-    const openNames = new Set(open.map(t => t.text.toLowerCase()));
+    const openNames = new Set(L.shop.filter(t => !t.done).map(t => t.text.toLowerCase()));
     const sugg = Object.entries(freq).filter(([k]) => !openNames.has(k)).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([k]) => k);
-    const row = t => `<div class="li ${t.done ? 'done' : ''}" data-li="${t.id}"><span class="check ${t.done ? 'on' : ''}" data-tog="1">${t.done ? icon('check', 14, 3) : ''}</span><span class="txt">${esc(t.text)}</span>${t.done ? '' : `<button class="price-btn" data-price="1" aria-label="Usporedi cijene">€?</button>`}<button class="star del" data-del="1" aria-label="Makni">✕</button></div>`;
-    body = `${addBar('Npr. mlijeko, kruh, jabuke…')}
-      ${sugg.length ? `<div class="chips sugg">${sugg.map(s => `<button class="chip" data-sugg="${esc(s)}">+ ${esc(s)}</button>`).join('')}</div>` : '<div class="note" style="margin:-2px 0 10px">Više stvari odjednom: odvoji zarezom. Ono što često kupuješ pojavit će se kao brzi gumbi.</div>'}
+    const row = t => { const p = shopPrice(t), q = t.qty || 1;
+      return `<div class="li ${t.done ? 'done' : ''} ${t.prio === 'wait' ? 'wait' : ''}" data-li="${t.id}"><span class="check ${t.done ? 'on' : ''}" data-tog="1">${t.done ? icon('check', 14, 3) : ''}</span><span class="txt"><span>${q > 1 ? `<b>${q}×</b>&nbsp;` : ''}${esc(t.text)}</span>${t.prio === 'wait' ? '<em>može čekati</em>' : t.prio === 'next' ? '<em>drugi put</em>' : ''}</span><button class="price-btn ${p ? (p.src === 'guess' ? 'guess' : 'set') : ''}" data-price="1" aria-label="Cijena">${p ? (p.src === 'guess' ? '≈' : '') + eur2(p.v * q) : '€?'}</button><button class="star del" data-del="1" aria-label="Makni">✕</button></div>`; };
+    const sum = arr => arr.reduce((a, t) => { const p = shopPrice(t); return a + (p ? p.v * (t.qty || 1) : 0); }, 0);
+    const need = open.filter(t => t.prio !== 'wait'), wait = open.filter(t => t.prio === 'wait');
+    const sNeed = sum(need), sWait = sum(wait), sCart = sum(done), unknown = open.filter(t => !shopPrice(t)).length;
+    let bal = null; try { bal = accBalance('tekuci'); } catch (e) {}
+    const total = sNeed + sWait + sCart;
+    const totalCard = (open.length || done.length) ? `<div class="card shop-sum">
+        <div class="kicker">Ova kupovina</div>
+        <div class="big">≈ ${eur2(sNeed + sCart)}</div>
+        <div class="ss-rows">
+          <div><span>Nužno${done.length ? ' + u košarici' : ''}</span><b>${eur2(sNeed + sCart)}</b></div>
+          ${wait.length ? `<div><span>Može čekati (${wait.length})</span><b>${eur2(sWait)}</b></div><div class="tot"><span>Sve zajedno</span><b>${eur2(total)}</b></div>` : ''}
+          ${bal !== null && isFinite(bal) ? `<div><span>Na tekućem nakon nužnog</span><b class="${bal - sNeed - sCart < 0 ? 'neg' : ''}">${eur2(bal - sNeed - sCart)}</b></div>` : ''}
+        </div>
+        <div class="note" style="margin:8px 0 0">≈ = okvirna cijena. Tapni cijenu da upišeš pravu, a aplikacija je zapamti za idući put.${unknown ? ` · ${unknown} bez cijene` : ''}</div>
+      </div>` : '';
+    body = `${addBar('Npr. omekšivač, 2x mlijeko, kruh…')}
+      ${sugg.length ? `<div class="chips sugg">${sugg.map(s => `<button class="chip" data-sugg="${esc(s)}">+ ${esc(s)}</button>`).join('')}</div>` : '<div class="note" style="margin:-2px 0 10px">Više stvari odjednom: odvoji zarezom. Količina: „2x mlijeko”.</div>'}
+      ${totalCard}
       <div class="card tight">${open.length ? open.map(row).join('') : emptyArt('', 'popis je prazan', 'Dodaj što trebaš kupiti.')}</div>
-      ${done.length ? `<div class="sec-head"><span class="section-title">U košarici (${done.length})</span></div>
+      ${done.length ? `<div class="sec-head"><span class="section-title">U košarici (${done.length}) · ${eur2(sCart)}</span></div>
         <div class="card tight">${done.map(row).join('')}</div>
-        <div class="actions"><button id="shopDone">${icon('wallet', 14, 2)} Gotova kupovina – upiši račun</button><button id="liClear">Očisti</button></div>` : ''}`;
+        <div class="actions"><button id="shopDone">${icon('wallet', 14, 2)} Gotova kupovina – upiši račun</button><button id="liClear">Očisti</button></div>` : ''}
+      ${later.length ? `<div class="sec-head"><span class="section-title">Drugi put (${later.length}) · ${eur2(sum(later))}</span></div>
+        <div class="note" style="margin:-4px 0 8px">Ne ulazi u zbroj. Kad zatreba: tapni cijenu → „🛒 Nužno”.</div>
+        <div class="card tight">${later.map(row).join('')}</div>` : ''}`;
   }
 
   if (seg === 'bucket') {
@@ -1991,20 +2024,73 @@ function renderLists() {
   view.querySelectorAll('[data-sugg]').forEach(b => b.onclick = () => { addShopItems(b.dataset.sugg); save(); render(); });
   const clr = document.getElementById('liClear'); if (clr) clr.onclick = () => { L[seg] = L[seg].filter(t => !t.done); save(); render(); };
   const sd = document.getElementById('shopDone'); if (sd) sd.onclick = () => {
-    const names = L.shop.filter(t => t.done).map(t => t.text);
+    const cart = L.shop.filter(t => t.done), names = cart.map(t => t.text);
+    const est = cart.reduce((a, t) => { const p = shopPrice(t); return a + (p ? p.v * (t.qty || 1) : 0); }, 0);
     L.shop = L.shop.filter(t => !t.done); save();
     openTxSheet(null, 'out');
-    setTimeout(() => { const n = document.getElementById('f-note'); if (n) n.value = 'Kupovina: ' + names.slice(0, 4).join(', ') + (names.length > 4 ? '…' : ''); }, 50);
+    setTimeout(() => { const n = document.getElementById('f-note'); if (n) n.value = 'Kupovina: ' + names.slice(0, 4).join(', ') + (names.length > 4 ? '…' : ''); const a = document.getElementById('f-amount'); if (a && !a.value && est > 0) { a.value = est.toFixed(2).replace('.', ','); a.placeholder = 'okvirno – upiši točan iznos s računa'; } }, 50);
   };
   view.querySelectorAll('[data-li]').forEach(el => el.onclick = ev => {
     const t = L[seg].find(x => x.id === el.dataset.li); if (!t) return;
     if (ev.target.closest('[data-star]')) { t.star = !t.star; save(); render(); return; }
     if (ev.target.closest('[data-del]')) { L[seg] = L[seg].filter(x => x.id !== t.id); save(); render(); return; }
-    if (ev.target.closest('[data-price]')) { comparePrice(t.text); return; }
+    if (ev.target.closest('[data-price]')) { openShopPriceSheet(t); return; }
     if (ev.target.closest('[data-bdone]')) { openBucketDoneSheet(t); return; }
     if (ev.target.closest('[data-tog]')) { toggleListItem(t); save(); render(); return; }
     openListItemSheet(seg, t);
   });
+}
+const PRICE_GUESS = [
+  ['maslinovo ulje', 9.5], ['suncokretovo ulje', 2.5], ['ulje', 2.5], ['omeksivac', 5], ['deterdzent za sude', 2], ['sredstvo za sude', 2], ['tablete za perilicu', 9], ['kapsule', 12], ['deterdzent', 12], ['prasak za rublje', 12], ['prasak', 12],
+  ['toaletni papir', 4.5], ['wc papir', 4.5], ['papirnati ruc', 3], ['ubrus', 3], ['maramic', 1.5], ['vrecice za smece', 2], ['vrece za smece', 2], ['spuzv', 1.5], ['sredstvo za cisc', 3], ['cistac', 3], ['folij', 2], ['papir za pecenje', 2],
+  ['sampon', 4], ['regenerator', 4], ['gel za tus', 3], ['sapun', 1.5], ['pasta za zube', 2.5], ['cetkic', 2.5], ['dezodorans', 4], ['ulosc', 3], ['tampon', 4], ['stapic', 1.5], ['vata', 1.5], ['krema', 5],
+  ['mlijeko', 1.2], ['jogurt', 0.9], ['kefir', 1], ['vrhnje', 1.2], ['maslac', 2.8], ['sir', 3.5], ['mozzarell', 1.5], ['kruh', 1.8], ['pecivo', 0.5], ['tortilj', 2.2], ['jaja', 3],
+  ['piletin', 8], ['pileci', 8], ['puretin', 9], ['mljeveno meso', 7], ['meso', 9], ['sunka', 2.5], ['salama', 2], ['hrenovk', 2.5], ['riba', 7],
+  ['tjestenin', 1.5], ['spageti', 1.5], ['riza', 2], ['brasno', 1], ['secer', 1.3], ['sol', 0.6], ['ocat', 1], ['kava', 5], ['caj', 2], ['kakao', 3], ['zitaric', 3], ['pahuljic', 2.5], ['zobene', 1.8], ['med', 7], ['dzem', 2.5], ['namaz', 3],
+  ['umak', 2], ['pelat', 1.2], ['konzerv', 1.5], ['grah', 1.2], ['kukuruz', 1.2], ['juha', 1],
+  ['keks', 1.8], ['cokolad', 1.8], ['cips', 2], ['grickal', 2], ['sladoled', 4],
+  ['sok', 2], ['voda', 0.6], ['mineraln', 1], ['pivo', 1.2], ['vino', 5],
+  ['jabuk', 2], ['banan', 1.6], ['narance', 2], ['mandarin', 2], ['limun', 2.5], ['grozd', 3.5], ['krumpir', 1.5], ['luk', 1.2], ['cesnjak', 1], ['rajcic', 3], ['paprik', 3], ['salat', 1.3], ['krastavac', 1.2], ['krastavc', 1.2], ['mrkv', 1.2], ['tikvic', 2.5], ['brokul', 2.5], ['gljiv', 2.5], ['avokad', 1.5]
+].sort((a, b) => b[0].length - a[0].length);
+function shopKey(n) { return (n || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/\s+/g, ' ').trim(); }
+function shopPrice(t) {
+  if (t.price > 0) return { v: t.price, src: 'set' };
+  const k = shopKey(t.text), mem = (state.shopPrices || {})[k];
+  if (mem > 0) return { v: mem, src: 'mem' };
+  const g = PRICE_GUESS.find(([w]) => k.includes(w));
+  return g ? { v: g[1], src: 'guess' } : null;
+}
+function eur2(v) { return (Math.round(v * 100) / 100).toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; }
+function openShopPriceSheet(t) {
+  const L = listsInit(), p = shopPrice(t), name = t.text;
+  try { navigator.clipboard && navigator.clipboard.writeText(name); } catch (e) {}
+  const pr = t.prio || 'need';
+  openSheet(name, `
+    <div class="field"><label>Cijena po komadu (€)${p && p.src === 'guess' ? ' · okvirno ' + eur2(p.v) : ''}</label><input id="f-pr" inputmode="decimal" placeholder="${p ? String(p.v).replace('.', ',') : 'npr. 4,99'}" value="${t.price > 0 ? String(t.price).replace('.', ',') : (p && p.src === 'mem' ? String(p.v).replace('.', ',') : '')}" autocomplete="off"></div>
+    <div class="field"><label>Količina</label><div class="qty"><button id="q-m">−</button><b id="q-v">${t.qty || 1}</b><button id="q-p">+</button></div></div>
+    <div class="field"><label>Koliko je hitno?</label><div class="chips" id="f-prio">
+      <button class="chip ${pr === 'need' ? 'on' : ''}" data-p="need">🛒 Nužno</button>
+      <button class="chip ${pr === 'wait' ? 'on' : ''}" data-p="wait">⏳ Može čekati</button>
+      <button class="chip ${pr === 'next' ? 'on' : ''}" data-p="next">📌 Drugi put</button></div></div>
+    <button class="btn" id="f-save">Spremi</button>
+    <div class="note" style="margin:14px 0 8px">Ne znaš cijenu? Naziv <b style="color:var(--ink)">„${esc(name)}”</b> je kopiran – zalijepi ga u tražilicu:</div>
+    <div style="display:flex;gap:8px"><a class="btn ghost" href="https://www.index.hr/cijene" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;margin:0">Index Cijene ↗</a><a class="btn ghost" href="https://usporedicijene.info" target="_blank" rel="noopener" style="flex:1;text-align:center;text-decoration:none;margin:0">Usporedi ↗</a></div>
+    <div class="note" style="margin:10px 0 0">Gledaj cijenu po litri / kg / pranju. DM i Müller često nisu u usporedbi.</div>`);
+  let qty = t.qty || 1, prio = pr;
+  const qv = document.getElementById('q-v');
+  document.getElementById('q-m').onclick = () => { qty = Math.max(1, qty - 1); qv.textContent = qty; };
+  document.getElementById('q-p').onclick = () => { qty = Math.min(99, qty + 1); qv.textContent = qty; };
+  const fp = document.getElementById('f-prio'); fp.onclick = ev => { const b = ev.target.closest('[data-p]'); if (!b) return; prio = b.dataset.p; fp.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); };
+  document.getElementById('f-save').onclick = () => {
+    const raw = document.getElementById('f-pr').value.trim().replace(/\s|€/g, '').replace(',', '.');
+    const v = parseFloat(raw);
+    if (raw && !(v >= 0)) return toast('Upiši cijenu, npr. 4,99');
+    if (v > 0) { t.price = Math.round(v * 100) / 100; state.shopPrices ||= {}; state.shopPrices[shopKey(name)] = t.price; }
+    else if (!raw) t.price = null;
+    t.qty = qty; t.prio = prio === 'need' ? null : prio;
+    save(); closeSheet(); render();
+    if (prio === 'next') toast('📌 Spremljeno za drugi put');
+  };
 }
 function comparePrice(name) {
   try { navigator.clipboard && navigator.clipboard.writeText(name); } catch (e) {}
@@ -2018,8 +2104,10 @@ function addShopItems(v) {
   const L = listsInit();
   state.shopHistory ||= [];
   v.split(/,|\si\s|\n/).map(x => x.trim()).filter(Boolean).forEach(n => {
+    let qty = 1; const qm = n.match(/^(\d{1,2})\s*(?:x|×|kom\.?|komada)?\s+(.+)$/i); if (qm) { qty = +qm[1] || 1; n = qm[2].trim(); }
     const name = n.charAt(0).toUpperCase() + n.slice(1);
-    if (!L.shop.some(t => !t.done && t.text.toLowerCase() === name.toLowerCase())) L.shop.push({ id: uid(), text: name, done: false });
+    const ex = L.shop.find(t => !t.done && t.text.toLowerCase() === name.toLowerCase());
+    if (ex) { if (ex.prio === 'next') ex.prio = null; if (qm) ex.qty = qty; } else L.shop.push({ id: uid(), text: name, done: false, qty });
     state.shopHistory.push(name); if (state.shopHistory.length > 300) state.shopHistory.shift();
   });
 }
