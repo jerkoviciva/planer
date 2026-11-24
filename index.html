@@ -372,6 +372,21 @@
 .wi-sel{flex:1;min-width:0;padding:8px;border:1px solid var(--ink);background:transparent;color:inherit;font:inherit;font-size:13px}
 #cfDays{margin-top:-4px}
 
+.ch-start{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;margin:14px 0 0;background:var(--surface);border:1.5px dashed var(--orange);color:inherit;text-align:left}
+.ch-start>span:first-child{font-size:22px}.ch-start>span:nth-child(2){flex:1;display:flex;flex-direction:column}
+.ch-start b{font-family:'Bodoni Moda',serif;font-size:18px}.ch-start i{font-style:normal;font-size:12px;color:var(--muted)}
+.ch-card{margin:14px 0 0;border-left:4px solid var(--orange)}
+.ch-top{display:flex;justify-content:space-between;align-items:center}.ch-top .kicker{color:var(--orange)}
+.ch-mid{display:flex;justify-content:space-between;align-items:flex-end;margin:6px 0 10px}
+.ch-streak{font-family:'Bodoni Moda',serif;font-size:40px;line-height:1}.ch-streak span{font-family:inherit;font-size:15px;margin-left:8px;color:var(--muted);font-style:italic}
+.ch-saved{text-align:right}.ch-saved i{display:block;font-style:normal;font-size:11px;color:var(--muted)}.ch-saved b{font-family:'Space Mono',monospace;color:var(--green)}
+.ch-dots{display:flex;flex-wrap:wrap;gap:4px}.ch-dots i{width:12px;height:12px;border:1px solid var(--ink);opacity:.35}
+.ch-dots i.ok{background:var(--green);border-color:var(--green);opacity:1}.ch-dots i.slip{background:var(--orange);border-color:var(--orange);opacity:1}.ch-dots i.miss{opacity:.15}.ch-dots i.now{opacity:1;border-width:2px}
+.ch-actions{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin-top:12px}
+.ch-actions button{padding:12px 8px;border:1.5px solid var(--ink);background:none;color:inherit;font-weight:700;font-size:14px}
+.ch-actions button:first-child{background:var(--ink);color:var(--bg)}
+.ch-done{margin-top:12px;font-size:14px;font-weight:600}.ch-done.ok{color:var(--green)}.ch-done.slip{color:var(--orange)}
+.ch-urge{width:100%;margin-top:8px;padding:10px;border:0;background:rgba(255,101,0,.1);color:inherit;font-size:14px}
 .lists-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
 .lists-strip button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 10px;background:var(--surface);border:1.5px solid var(--ink);text-align:left;color:inherit}
 .lists-strip span{font-size:20px}
@@ -787,6 +802,7 @@ function renderHome() {
     </div>
 
     ${topTodayHtml()}
+    ${challengeHtml()}
     ${listsStrip()}
 
     ${playerHtml()}
@@ -812,6 +828,7 @@ function renderHome() {
   bindPlayer();
   bindVerse();
   bindListsHome();
+  bindChallenge();
   document.getElementById('q-voice').onclick = openSmartSheet;
   document.getElementById('q-ev').onclick = () => openEventSheet(null, { date: today });
   document.getElementById('q-mo').onclick = () => openMomentSheet();
@@ -1905,6 +1922,85 @@ const BUCKET_CATS = [
 const bucketCat = id => BUCKET_CATS.find(c => c.id === id) || BUCKET_CATS[BUCKET_CATS.length - 1];
 function listsInit() { state.lists ||= { todo: [], shop: [], bucket: [] }; for (const k of ['todo', 'shop', 'bucket']) state.lists[k] ||= []; return state.lists; }
 
+/* ===================== NO-BUY IZAZOV ===================== */
+const CH_RULES = 'Smije: namirnice s popisa, režije, prijevoz, lijekovi, rate, faks. Ne smije: odjeća, kozmetika „usput”, gadgeti, dostava, sitnice „jer je akcija”.';
+function chState() { return state.challenge || null; }
+function chDayIdx(c, d) { return Math.round((parseYmd(d) - parseYmd(c.start)) / 86400000); }
+function chStreak(c) { let n = 0, d = todayStr(); if (!c.log[d]) d = addDays(d, -1); while (d >= c.start && c.log[d] === 'ok') { n++; d = addDays(d, -1); } return n; }
+function chTodayRisky() { const t = todayStr(); return (state.tx || []).filter(x => x.type === 'out' && x.date === t && ['kupovina', 'izlasci', 'ostalo'].includes(x.cat)); }
+function challengeHtml() {
+  const c = chState();
+  if (!c || c.ended) {
+    return `<button class="ch-start" id="chStart"><span>🔥</span><span><b>No-buy izazov</b><i>${c && c.ended ? `zadnji: ${c.okCount}/${c.days} dana · pokreni novi` : 'X dana bez nepotrebne kupnje'}</i></span><span>→</span></button>`;
+  }
+  const t = todayStr(), idx = chDayIdx(c, t), todayLog = c.log[t], streak = chStreak(c);
+  const okCount = Object.values(c.log).filter(v => v === 'ok').length;
+  const dots = Array.from({ length: c.days }, (_, i) => { const d = addDays(c.start, i), v = c.log[d]; return `<i class="${v === 'ok' ? 'ok' : v === 'slip' ? 'slip' : d < t ? 'miss' : d === t ? 'now' : ''}"></i>`; }).join('');
+  const risky = chTodayRisky();
+  return `<div class="card ch-card" id="chCard">
+    <div class="ch-top"><span class="kicker">No-buy izazov · dan ${Math.min(idx + 1, c.days)}/${c.days}</span><button class="link-btn" id="chMore">⋯</button></div>
+    <div class="ch-mid"><div class="ch-streak">🔥 ${streak}<span>${plural(streak, 'dan', 'dana', 'dana')} zaredom</span></div>
+      ${c.resisted ? `<div class="ch-saved"><i>Odoljela si</i><b>${money(c.resisted)}</b></div>` : ''}</div>
+    <div class="ch-dots">${dots}</div>
+    ${risky.length && !todayLog ? `<div class="note" style="margin:8px 0 0">Danas imaš trošak u kategoriji ${esc(txCat(risky[0].cat).name)} (${money(risky.reduce((a, x) => a + x.amount, 0))}). Je li bio nužan? Budi iskrena sa sobom 🙂</div>` : ''}
+    ${todayLog ? `<div class="ch-done ${todayLog}">${todayLog === 'ok' ? '✓ Danas samo nužno. Bravo!' : 'Danas je bio „slip”. Sutra je novi dan – ne odustaj.'} <button class="link-btn" id="chUndo">promijeni</button></div>`
+      : `<div class="ch-actions"><button id="chOk">✓ Danas samo nužno</button><button id="chSlip">Kupila sam nešto</button></div>`}
+    <button class="ch-urge" id="chUrge">😵 Imam poriv nešto kupiti</button>
+  </div>`;
+}
+function bindChallenge() {
+  const st = document.getElementById('chStart'); if (st) st.onclick = openChallengeStart;
+  const c = chState(); if (!c || c.ended) return;
+  const t = todayStr();
+  const fin = () => { if (chDayIdx(c, t) >= c.days - 1) { c.ended = true; c.okCount = Object.values(c.log).filter(v => v === 'ok').length; save(); render(); toast(`🎉 Izazov gotov: ${c.okCount}/${c.days} dana!`); return true; } return false; };
+  const ok = document.getElementById('chOk'); if (ok) ok.onclick = () => { c.log[t] = 'ok'; save(); if (!fin()) { render(); toast(['🔥 Još jedan dan!', '💪 Tako se to radi', '✨ Novčanik ti zahvaljuje'][chStreak(c) % 3]); } };
+  const sl = document.getElementById('chSlip'); if (sl) sl.onclick = () => openChallengeSlip(c);
+  const un = document.getElementById('chUndo'); if (un) un.onclick = () => { delete c.log[t]; save(); render(); };
+  document.getElementById('chUrge').onclick = () => openUrgeSheet(c);
+  document.getElementById('chMore').onclick = () => { openSheet('No-buy izazov', `
+    <div class="note" style="margin:0 0 12px">${CH_RULES}</div>
+    <div class="note" style="margin:0 0 14px">Počela si ${shortDate(c.start)} · ${c.days} dana · zadnji dan ${shortDate(addDays(c.start, c.days - 1))}.</div>
+    <button class="btn danger" id="chStop">Prekini izazov</button>`);
+    document.getElementById('chStop').onclick = () => { c.ended = true; c.okCount = Object.values(c.log).filter(v => v === 'ok').length; save(); closeSheet(); render(); };
+  };
+}
+function openChallengeStart() {
+  let days = 30;
+  openSheet('🔥 No-buy izazov', `
+    <div class="note" style="margin:0 0 12px">Svaki dan jedan klik: je li danas bilo <b style="color:var(--ink)">samo nužno</b>? Skupljaš niz dana zaredom. Kad te uhvati poriv, stisni gumb i stvar ide na Listu želja (pravilo 30 dana) umjesto u košaricu.</div>
+    <div class="field"><label>Koliko dana?</label><div class="chips" id="chDays">${[7, 14, 21, 30].map(d => `<button class="chip ${d === 30 ? 'on' : ''}" data-d="${d}">${d} dana</button>`).join('')}</div></div>
+    <div class="note" style="margin:0 0 14px"><b style="color:var(--ink)">Pravila:</b> ${CH_RULES}</div>
+    <button class="btn" id="chGo">Kreni od danas</button>`);
+  const cd = document.getElementById('chDays'); cd.onclick = ev => { const b = ev.target.closest('[data-d]'); if (!b) return; days = +b.dataset.d; cd.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); };
+  document.getElementById('chGo').onclick = () => { const prev = state.challenge; state.challenge = { start: todayStr(), days, log: {}, resisted: 0, best: prev ? Math.max(prev.best || 0, prev.okCount || 0) : 0 }; save(); closeSheet(); render(); toast('🔥 Izazov je počeo. Možeš ti to!'); };
+}
+function openChallengeSlip(c) {
+  openSheet('Kupila sam nešto', `
+    <div class="note" style="margin:0 0 12px">Ok, događa se. Bitno je da zapišeš i nastaviš sutra.</div>
+    <div class="field"><label>Što i koliko? (neobavezno)</label><div class="row2"><input id="f-what" placeholder="npr. majica" autocomplete="off"><input id="f-amt" inputmode="decimal" placeholder="€"></div></div>
+    <button class="btn" id="f-ok">Zapiši</button>
+    <div class="note" style="margin:12px 0 0">Ako je ipak bilo nužno (lijek, nešto za posao…), zatvori ovo i stisni „✓ Danas samo nužno”.</div>`);
+  document.getElementById('f-ok').onclick = () => {
+    const t = todayStr(), what = document.getElementById('f-what').value.trim(), a = parseAmount(document.getElementById('f-amt').value);
+    c.log[t] = 'slip';
+    if (a > 0) state.tx.push({ id: uid(), created: Date.now(), type: 'out', amount: a, acc: 'tekuci', cat: 'kupovina', date: t, note: what || 'Kupovina (izazov)' });
+    save(); closeSheet(); render(); toast(a > 0 ? 'Zapisano i kao trošak' : 'Zapisano. Sutra ispočetka 💪');
+  };
+}
+function openUrgeSheet(c) {
+  openSheet('😵 Poriv za kupnjom', `
+    <div class="note" style="margin:0 0 12px">Stani na 10 sekundi. Što bi kupila i koliko košta?</div>
+    <div class="field"><label>Što?</label><input id="f-what" placeholder="npr. nova torbica" autocomplete="off"></div>
+    <div class="field"><label>Cijena (€)</label><input id="f-amt" inputmode="decimal" placeholder="0,00" style="font-size:22px;font-weight:800"></div>
+    <div class="note" id="f-hint" style="margin:0 0 12px"></div>
+    <button class="btn" id="f-wish">⏳ Stavi na Listu želja (30 dana)</button>
+    <button class="btn ghost" id="f-skip">💪 Ne treba mi – odoljela sam</button>`);
+  const amt = document.getElementById('f-amt'), hint = document.getElementById('f-hint');
+  amt.oninput = () => { const a = parseAmount(amt.value); if (!(a > 0)) { hint.textContent = ''; return; } const days = Math.round(a / 15); hint.innerHTML = `To je otprilike <b style="color:var(--ink)">${Math.max(1, Math.round(a / 9))} ${plural(Math.max(1, Math.round(a / 9)), 'kava', 'kave', 'kava')}</b> u kafiću${a >= 30 ? ` ili ${days} ${plural(days, 'dan', 'dana', 'dana')} hrane` : ''}. Hoće li ti to i za tjedan dana biti bitno?`; };
+  const take = () => ({ what: document.getElementById('f-what').value.trim(), a: parseAmount(amt.value) });
+  document.getElementById('f-wish').onclick = () => { const { what, a } = take(); if (!what) return toast('Upiši što želiš'); state.wishes ||= []; state.wishes.push({ id: uid(), name: what, price: a > 0 ? a : 0, need: false, link: '', added: todayStr() }); if (a > 0) c.resisted = (c.resisted || 0) + a; save(); closeSheet(); render(); toast('⏳ Na listi želja. Vidimo se za 30 dana!'); };
+  document.getElementById('f-skip').onclick = () => { const { a } = take(); if (a > 0) c.resisted = (c.resisted || 0) + a; save(); closeSheet(); render(); toast(a > 0 ? `💪 ${money(a)} ostaje kod tebe` : '💪 Bravo!'); };
+}
 function listsStrip() {
   const L = listsInit();
   const todoOpen = L.todo.filter(t => !t.done).length, shopOpen = L.shop.filter(t => !t.done && t.prio !== 'next').length;
@@ -2385,8 +2481,8 @@ function finSavings(bSted) {
     ${free < 0 && ui.reveal ? `<div class="warn">Ciljevima je dodijeljeno više nego što imaš na štednom.</div>` : ''}
     ${state.debts.some(d => d.fund && d.balance > 0) ? `<div class="sec-head"><span class="section-title">Fondovi za kredite</span></div>
     <div class="card tight">${state.debts.filter(d => d.fund && d.balance > 0).map(d => `<div class="debt" data-debt="${d.id}"><div class="top"><span class="nm">${esc(d.name)}</span></div>${fundHtml(d)}</div>`).join('')}</div>` : ''}
-    <div class="sec-head"><span class="section-title">Ciljevi štednje</span></div>
-    <div class="card tight">${state.goals.length ? state.goals.map(card).join('') : emptyArt('', 'prvi cilj?', 'Putovanje, selidba, novi laptop… dodaj na +')}</div>
+    <div class="sec-head"><span class="section-title">Ciljevi štednje</span><button class="link-btn" id="goalAdd">+ Dodaj</button></div>
+    <div class="card tight">${state.goals.length ? state.goals.map(card).join('') : emptyArt('', 'prvi cilj?', 'Putovanje, selidba, novi laptop… dodaj na + Dodaj')}</div>
     ${wishSection()}`;
 }
 
@@ -2465,6 +2561,7 @@ function openWishSheet(existing) {
 }
 function bindWishes() {
   const add = document.getElementById('wishAdd'); if (add) add.onclick = () => openWishSheet();
+  const gAdd = document.getElementById('goalAdd'); if (gAdd) gAdd.onclick = () => openGoalSheet();
   view.querySelectorAll('[data-wish]').forEach(el => el.onclick = ev => {
     if (ev.target.closest('a')) return;
     const w = (state.wishes || []).find(x => x.id === el.dataset.wish); if (!w) return;
