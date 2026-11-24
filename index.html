@@ -141,6 +141,13 @@
   .t-mom > * { position: relative; }
   .t-mom .name { font-style: italic; font-size: 42px; font-weight: 800; letter-spacing: -.03em; }
   .t-mom .info { max-width: 62%; font-size: 13.5px; }
+  .t-faith { grid-column: 1 / -1; min-height: 110px; background: linear-gradient(120deg, var(--night) 0%, #2a1d4a 100%); color: #F6EFE6; border: 0; justify-content: flex-start; gap: 2px; }
+  .t-faith .kicker { color: #FFD2B0; }
+  .t-faith .name { font-family: 'Bodoni Moda', serif; font-style: italic; font-size: 34px; font-weight: 800; letter-spacing: -.02em; }
+  .t-faith .info { display: flex; align-items: center; gap: 6px; font-size: 13px; flex-wrap: wrap; }
+  .t-faith .info span { font-size: 17px; opacity: .3; filter: grayscale(1); }
+  .t-faith .info span.on { opacity: 1; filter: none; }
+  .t-faith .info em { font-style: normal; margin-left: 6px; opacity: .85; }
   .tile-ic { margin-bottom: 8px; }
 
   /* Player */
@@ -372,6 +379,32 @@
 .wi-sel{flex:1;min-width:0;padding:8px;border:1px solid var(--ink);background:transparent;color:inherit;font:inherit;font-size:13px}
 #cfDays{margin-top:-4px}
 
+.f-read{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;margin-top:12px}
+.f-read>span:first-child{font-size:24px}.f-read>span:nth-child(2){flex:1;display:flex;flex-direction:column}.f-read b{font-size:16px}.f-read i{font-style:normal;font-size:12px;color:var(--muted)}
+.fr-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid var(--line,rgba(0,0,0,.08))}
+.fr-row:first-of-type{border-top:0}
+.fr-today{flex:1;text-align:left;padding:10px;border:1.5px solid var(--ink);background:none;color:inherit;font-size:14px;font-weight:600}
+.fr-today.on{background:var(--ink);color:var(--bg)}
+.fr-week{display:flex;gap:3px}.fr-week i{width:18px;height:22px;display:grid;place-items:center;font-style:normal;font-size:9px;font-family:'Space Mono',monospace;border:1px solid var(--line,rgba(0,0,0,.15));color:var(--muted)}
+.fr-week i.on{background:var(--green);border-color:var(--green);color:#fff}
+.f-grat{display:flex;align-items:center;gap:10px;margin:0 0 8px}.f-grat span{font-family:'Bodoni Moda',serif;font-size:20px;width:18px}
+.f-grat input{flex:1;padding:12px;border:1.5px solid var(--ink);background:var(--surface);color:inherit;font:inherit;font-size:16px}
+.f-gh{padding:10px 0;border-bottom:1px solid var(--line,rgba(0,0,0,.08));font-size:15px}.f-gh b{display:block;font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:4px}
+.f-rosary{display:block;width:100%;text-align:left;background:var(--night);color:#F6EFE6;border:0;margin:12px 0}
+.f-rosary .kicker{color:#FFD2B0}.f-rosary .name{font-family:'Bodoni Moda',serif;font-style:italic;font-size:30px;margin-top:4px}.f-rosary .note{color:rgba(246,239,230,.75)}
+.f-rosary .go{display:inline-block;margin-top:12px;padding:8px 14px;background:var(--orange);color:#fff;font-weight:700}
+.f-prayer{padding:12px 14px;border-top:1px solid var(--line,rgba(0,0,0,.08))}.f-prayer:first-child{border-top:0}
+.f-prayer summary{font-family:'Bodoni Moda',serif;font-size:19px;cursor:pointer;list-style:none}.f-prayer summary::after{content:' ↓';font-size:13px;opacity:.5}
+.f-prayer[open] summary::after{content:' ↑'}.f-prayer p{margin:10px 0 4px;font-size:16px;line-height:1.6}
+.ros-top{display:flex;justify-content:space-between;align-items:center;font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);margin:4px 0 10px}
+.ros-decs{display:flex;gap:6px}.ros-decs i{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink);opacity:.4}.ros-decs i.now{background:var(--orange);border-color:var(--orange);opacity:1}.ros-decs i.ok{background:var(--ink);opacity:1}
+.ros-card .kicker{color:var(--orange)}.ros-t{font-family:'Bodoni Moda',serif;font-size:30px;line-height:1.1;margin:4px 0 10px}
+.ros-big{font-family:'Bodoni Moda',serif;font-style:italic;font-size:22px;color:var(--blue);margin:0 0 12px}
+.ros-x{font-size:17px;line-height:1.65}
+.ros-beads{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.ros-beads i{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--ink)}.ros-beads i.on{background:var(--orange);border-color:var(--orange)}
+.ros-tap{width:100%;margin-top:14px;padding:22px;background:var(--blue);color:#fff;border:0;font-size:18px;font-weight:700}
+.ros-nav{display:flex;justify-content:space-between;margin-top:10px}.ros-nav button{background:none;border:0;color:var(--muted);padding:10px 4px;font-size:14px}.ros-nav button:disabled{opacity:.3}
+.done-nk .txt{opacity:.85}
 .ch-start{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;margin:14px 0 0;background:var(--surface);border:1.5px dashed var(--orange);color:inherit;text-align:left}
 .ch-start>span:first-child{font-size:22px}.ch-start>span:nth-child(2){flex:1;display:flex;flex-direction:column}
 .ch-start b{font-family:'Bodoni Moda',serif;font-size:18px}.ch-start i{font-style:normal;font-size:12px;color:var(--muted)}
@@ -662,7 +695,7 @@ backBtn.innerHTML = icon('chevron-left');
 fab.innerHTML = icon('plus', 28, 2);
 tabsEl.innerHTML = TABS.map(t => `<button data-tab="${t.id}">${icon(t.ico, 22)}${t.name}</button>`).join('');
 
-function go(tab) { ui.cashflow = false; ui.tab = tab; ui.subject = null; ui.project = null; ui.course = null; window.scrollTo(0, 0); render(); }
+function go(tab) { ui.cashflow = false; ui.rosary = null; ui.tab = tab; ui.subject = null; ui.project = null; ui.course = null; window.scrollTo(0, 0); render(); }
 
 function setHeader(title, sub, { back = false, btn = null, big = false } = {}) {
   titleEl.textContent = title; subEl.textContent = sub;
@@ -674,7 +707,7 @@ function setHeader(title, sub, { back = false, btn = null, big = false } = {}) {
 
 function render() {
   tabsEl.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.tab === ui.tab));
-  fab.classList.toggle('hidden', ['home', 'postavke', 'liste'].includes(ui.tab));
+  fab.classList.toggle('hidden', ['home', 'postavke', 'liste', 'vjera'].includes(ui.tab));
   if (ui.tab === 'home') renderHome();
   else if (ui.tab === 'kalendar') renderPlanner();
   else if (ui.tab === 'financije') renderFinance();
@@ -682,6 +715,7 @@ function render() {
   else if (ui.tab === 'projekti') ui.project ? renderProject() : renderProjects();
   else if (ui.tab === 'moments') renderMoments();
   else if (ui.tab === 'liste') renderLists();
+  else if (ui.tab === 'vjera') renderFaith();
   else renderSettings();
   view.classList.remove('fade'); void view.offsetWidth; view.classList.add('fade');
 }
@@ -799,6 +833,7 @@ function renderHome() {
         <div class="info">${monthMoments.length ? `${monthMoments.length} ${plural(monthMoments.length, 'trenutak', 'trenutka', 'trenutaka')} u ${MONTHS_LOC[now.getMonth()]}` : 'Knjige, filmovi, dejtovi, izlasci… zapiši lijepe trenutke'}</div>
         <div style="margin-top:6px">${icon('arrow-right', 22, 1.5) || '→'}</div>
       </button>
+      ${faithTileHtml()}
     </div>
 
     ${topTodayHtml()}
@@ -1921,6 +1956,169 @@ const BUCKET_CATS = [
 ];
 const bucketCat = id => BUCKET_CATS.find(c => c.id === id) || BUCKET_CATS[BUCKET_CATS.length - 1];
 function listsInit() { state.lists ||= { todo: [], shop: [], bucket: [] }; for (const k of ['todo', 'shop', 'bucket']) state.lists[k] ||= []; return state.lists; }
+
+/* ===================== VJERA ===================== */
+const PRAYERS = [
+  ['Znak križa', 'U ime Oca i Sina i Duha Svetoga. Amen.'],
+  ['Oče naš', 'Oče naš, koji jesi na nebesima, sveti se ime tvoje, dođi kraljevstvo tvoje, budi volja tvoja, kako na nebu tako i na zemlji. Kruh naš svagdanji daj nam danas. I otpusti nam duge naše, kako i mi otpuštamo dužnicima našim. I ne uvedi nas u napast, nego izbavi nas od zla. Amen.'],
+  ['Zdravo Marijo', 'Zdravo Marijo, milosti puna, Gospodin s tobom! Blagoslovljena ti među ženama i blagoslovljen plod utrobe tvoje, Isus. Sveta Marijo, Majko Božja, moli za nas grešnike, sada i na času smrti naše. Amen.'],
+  ['Slava Ocu', 'Slava Ocu i Sinu i Duhu Svetomu. Kako bijaše na početku, tako i sada i vazda i u vijeke vjekova. Amen.'],
+  ['Vjerovanje (Apostolsko)', 'Vjerujem u Boga, Oca svemogućega, Stvoritelja neba i zemlje. I u Isusa Krista, Sina njegova jedinoga, Gospodina našega, koji je začet po Duhu Svetom, rođen od Marije Djevice, mučen pod Poncijem Pilatom, raspet, umro i pokopan; sašao nad pakao, treći dan uskrsnuo od mrtvih; uzašao na nebesa, sjedi s desna Boga Oca svemogućega; odonud će doći suditi žive i mrtve. Vjerujem u Duha Svetoga, svetu Crkvu katoličku, općinstvo svetih, otpuštenje grijeha, uskrsnuće tijela i život vječni. Amen.'],
+  ['Anđeo Gospodnji', 'Anđeo Gospodnji navijestio je Mariji.\n— I ona je začela po Duhu Svetom.\nZdravo Marijo…\n\nEvo službenice Gospodnje.\n— Neka mi bude po riječi tvojoj.\nZdravo Marijo…\n\nI Riječ je tijelom postala.\n— I prebivala među nama.\nZdravo Marijo…\n\nMoli za nas, sveta Bogorodice.\n— Da dostojni postanemo obećanja Kristovih.\n\nPomolimo se: Milost svoju, molimo te, Gospodine, ulij u duše naše, da mi, koji smo po anđelovu navještenju upoznali utjelovljenje Krista, Sina tvojega, po muci njegovoj i križu dođemo do slave uskrsnuća. Po istom Kristu Gospodinu našemu. Amen.'],
+  ['Zdravo Kraljice', 'Zdravo Kraljice, majko milosrđa, živote, slasti i ufanje naše, zdravo! K tebi vapijemo prognani sinovi Evini. K tebi uzdišemo tugujući i plačući u ovoj suznoj dolini. Svrni dakle, odvjetnice naša, one svoje milostive oči na nas. I Isusa, blagoslovljeni plod utrobe svoje, pokaži nam nakon ovoga progonstva. O blaga, o mila, o slatka Djevice Marijo!\n\nMoli za nas, sveta Bogorodice.\n— Da dostojni postanemo obećanja Kristovih.'],
+  ['O moj Isuse', 'O moj Isuse, oprosti nam grijehe naše, očuvaj nas od ognja paklenoga i dovedi u nebo sve duše, osobito one kojima je najpotrebnije tvoje milosrđe.'],
+  ['Anđele Božji', 'Anđele Božji, čuvaru moj, mene, koji sam tebi od dobrote Božje predan, prosvijetli, čuvaj, ravnaj i upravljaj. Amen.']
+];
+const prayer = n => (PRAYERS.find(p => p[0].startsWith(n)) || ['', ''])[1];
+const MYSTERIES = {
+  radosna: ['Radosna otajstva', ['koga si, Djevice, po Duhu Svetom začela', 'koga si, Djevice, Elizabeti u pohode nosila', 'koga si, Djevice, rodila', 'koga si, Djevice, u hramu prikazala', 'koga si, Djevice, u hramu našla']],
+  svjetla: ['Otajstva svjetla', ['koji je na rijeci Jordanu kršten bio', 'koji nam se na svadbi u Kani objavio', 'koji nam je kraljevstvo Božje navijestio', 'koji se na gori preobrazio', 'koji nam se u euharistiji dao']],
+  zalosna: ['Žalosna otajstva', ['koji je za nas krvavim znojem se znojio', 'koji je za nas bičevan bio', 'koji je za nas trnjem okrunjen bio', 'koji je za nas teški križ nosio', 'koji je za nas raspet bio']],
+  slavna: ['Slavna otajstva', ['koji je od mrtvih uskrsnuo', 'koji je na nebo uzašao', 'koji je Duha Svetoga poslao', 'koji je tebe, Djevice, na nebo uzeo', 'koji je tebe, Djevice, na nebu okrunio']]
+};
+function mysteryOfDay(d) { return ['slavna', 'radosna', 'zalosna', 'slavna', 'svjetla', 'zalosna', 'radosna'][parseYmd(d).getDay()]; }
+const RHYTHM = [['jutro', '🌅', 'Jutarnja molitva'], ['vecer', '🌙', 'Večernja molitva'], ['misa', '⛪', 'Misa'], ['krunica', '📿', 'Krunica']];
+function faithInit() { state.faith ||= {}; const f = state.faith; f.gratitude ||= {}; f.rhythm ||= {}; f.intentions ||= []; return f; }
+function rosarySteps(kind) {
+  const [name, ms] = MYSTERIES[kind], ord = ['Prvo', 'Drugo', 'Treće', 'Četvrto', 'Peto'];
+  const s = [
+    { t: 'Znak križa', x: prayer('Znak') },
+    { t: 'Vjerovanje', x: prayer('Vjerovanje') },
+    { t: 'Oče naš', x: prayer('Oče naš') },
+    { t: 'Zdravo Marijo × 3', sub: 'za vjeru, ufanje i ljubav', x: prayer('Zdravo Marijo'), n: 3 },
+    { t: 'Slava Ocu', x: prayer('Slava') }
+  ];
+  ms.forEach((m, i) => {
+    s.push({ t: `${ord[i]} otajstvo`, sub: name, big: `Isus, ${m}.`, x: prayer('Oče naš'), dec: i });
+    s.push({ t: 'Zdravo Marijo × 10', sub: `…plod utrobe tvoje, Isus, ${m}.`, x: prayer('Zdravo Marijo').replace('Isus.', `Isus, ${m}.`), n: 10, dec: i });
+    s.push({ t: 'Slava Ocu · O moj Isuse', x: prayer('Slava') + '\n\n' + prayer('O moj'), dec: i });
+  });
+  s.push({ t: 'Zdravo Kraljice', x: prayer('Zdravo Kraljice') });
+  s.push({ t: 'Znak križa', x: prayer('Znak'), last: true });
+  return s;
+}
+function faithTileHtml() {
+  const f = faithInit(), t = todayStr(), r = f.rhythm[t] || {};
+  const open = f.intentions.filter(i => !i.answered).length;
+  const grat = (f.gratitude[t] || []).filter(Boolean).length;
+  return `<button class="tile t-faith" data-go="vjera">
+    <div class="kicker">✝ Vjera</div>
+    <div class="name">Mir za dušu</div>
+    <div class="info">${RHYTHM.map(([k, e]) => `<span class="${r[k] ? 'on' : ''}">${e}</span>`).join('')}<em>${grat ? `zahvalnost ${grat}/3` : 'zahvalnost ✎'}${open ? ` · ${open} ${plural(open, 'nakana', 'nakane', 'nakana')}` : ''}</em></div>
+  </button>`;
+}
+function renderFaith() {
+  const f = faithInit(), t = todayStr(), seg = ui.faithSeg || 'danas';
+  if (ui.rosary) return renderRosary();
+  setHeader('Vjera', 'Mir za dušu', { back: true });
+  const segHtml = `<div class="seg" id="fseg">${[['danas', 'Danas'], ['molitva', 'Molitva'], ['nakane', 'Nakane']].map(([k, n]) => `<button data-s="${k}" class="${seg === k ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+  let body = '';
+  if (seg === 'danas') {
+    const d = parseYmd(t), q = `misna čitanja ${d.getDate()}. ${MONTHS_GEN[d.getMonth()]} ${d.getFullYear()}`;
+    const g = f.gratitude[t] || ['', '', ''];
+    const days = Array.from({ length: 7 }, (_, i) => addDays(t, i - 6));
+    const DN = ['N', 'P', 'U', 'S', 'Č', 'P', 'S'];
+    const past = Object.keys(f.gratitude).filter(k => k < t && (f.gratitude[k] || []).some(Boolean)).sort().reverse();
+    body = `${verseHtml() || ''}
+      <a class="card f-read" href="https://www.google.com/search?q=${encodeURIComponent(q)}" target="_blank" rel="noopener"><span>📖</span><span><b>Misna čitanja za danas</b><i>${d.getDate()}. ${MONTHS_GEN[d.getMonth()]} · otvara pretragu</i></span><span>↗</span></a>
+      <div class="sec-head"><span class="section-title">Molitveni ritam</span></div>
+      <div class="card f-rhythm">
+        <div class="note" style="margin:0 0 10px">Bez osjećaja krivnje – samo da vidiš svoj ritam. Tapni kad obaviš.</div>
+        ${RHYTHM.map(([k, e, n]) => `<div class="fr-row"><button class="fr-today ${(f.rhythm[t] || {})[k] ? 'on' : ''}" data-rh="${k}">${e} ${n}</button><span class="fr-week">${days.map(dd => `<i class="${(f.rhythm[dd] || {})[k] ? 'on' : ''}" title="${dd}">${DN[parseYmd(dd).getDay()]}</i>`).join('')}</span></div>`).join('')}
+      </div>
+      <div class="sec-head"><span class="section-title">Zahvalnost</span></div>
+      <div class="card">
+        <div class="note" style="margin:0 0 10px">Tri stvari na kojima si danas zahvalna. Male su sasvim u redu.</div>
+        ${[0, 1, 2].map(i => `<div class="f-grat"><span>${i + 1}.</span><input data-g="${i}" value="${esc(g[i] || '')}" placeholder="${['npr. topla kava ujutro', 'npr. poruka od prijateljice', 'npr. stigla sam sve na poslu'][i]}" autocomplete="off" enterkeyhint="done"></div>`).join('')}
+        ${past.length ? `<button class="link-btn" id="gratHist" style="margin-top:10px">Dnevnik zahvalnosti (${past.length} ${plural(past.length, 'dan', 'dana', 'dana')}) →</button>` : ''}
+      </div>`;
+  }
+  if (seg === 'molitva') {
+    const k = mysteryOfDay(t);
+    body = `<button class="card f-rosary" id="rosGo">
+        <div class="kicker">📿 Krunica · danas</div>
+        <div class="name">${MYSTERIES[k][0]}</div>
+        <div class="note" style="margin:4px 0 0">Vodim te korak po korak, desetica po desetica. Oko 20 minuta.</div>
+        <span class="go">Započni →</span></button>
+      <div class="chips" id="rosOther" style="margin:-4px 0 14px">${Object.keys(MYSTERIES).filter(x => x !== k).map(x => `<button class="chip" data-k="${x}">${MYSTERIES[x][0]}</button>`).join('')}</div>
+      <div class="sec-head"><span class="section-title">Molitvenik</span></div>
+      <div class="card tight">${PRAYERS.map((p, i) => `<details class="f-prayer"><summary>${esc(p[0])}</summary><p>${esc(p[1]).replace(/\n/g, '<br>')}</p></details>`).join('')}</div>`;
+  }
+  if (seg === 'nakane') {
+    const open = f.intentions.filter(i => !i.answered), done = f.intentions.filter(i => i.answered).sort((a, b) => (b.answeredDate || '').localeCompare(a.answeredDate || ''));
+    body = `<div class="add-bar"><input id="nkAdd" placeholder="Za koga ili za što moliš…" autocomplete="off" enterkeyhint="done"><button id="nkAddB" aria-label="Dodaj">${icon('plus', 20, 2.2)}</button></div>
+      <div class="card tight">${open.length ? open.map(i => `<div class="li" data-nk="${i.id}"><span class="bemoji">🕯️</span><span class="txt">${esc(i.text)}<em>od ${shortDate(i.created)}</em></span><button class="mini-btn" data-ans="1">Uslišano</button></div>`).join('') : emptyArt('', 'nema nakana', 'Upiši za koga ili za što moliš.')}</div>
+      ${done.length ? `<div class="sec-head"><span class="section-title">Uslišano 🙏 (${done.length})</span></div>
+        <div class="card tight">${done.map(i => `<div class="li done-nk" data-nk="${i.id}"><span class="bemoji">🙏</span><span class="txt">${esc(i.text)}<em>${shortDate(i.answeredDate)}${i.note ? ' · ' + esc(i.note) : ''}</em></span></div>`).join('')}</div>
+        <div class="note" style="margin:8px 0 0">Kad ti bude teško, vrati se ovdje i pogledaj ovaj popis.</div>` : ''}`;
+  }
+  view.innerHTML = segHtml + body;
+  document.getElementById('fseg').onclick = ev => { const b = ev.target.closest('[data-s]'); if (b) { ui.faithSeg = b.dataset.s; render(); } };
+  if (seg === 'danas') {
+    bindVerse();
+    view.querySelectorAll('[data-rh]').forEach(b => b.onclick = () => { const r = (f.rhythm[t] ||= {}); r[b.dataset.rh] = !r[b.dataset.rh]; save(); render(); });
+    view.querySelectorAll('[data-g]').forEach(inp => {
+      const store = () => { const a = (f.gratitude[t] ||= ['', '', '']); a[+inp.dataset.g] = inp.value.trim(); save(); };
+      inp.onchange = store; inp.onblur = store;
+      inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); store(); const n = view.querySelector(`[data-g="${+inp.dataset.g + 1}"]`); if (n) n.focus(); else { inp.blur(); if ((f.gratitude[t] || []).filter(Boolean).length === 3) toast('🙏 Hvala za danas'); } } };
+    });
+    const gh = document.getElementById('gratHist'); if (gh) gh.onclick = () => {
+      const ks = Object.keys(f.gratitude).filter(k => k < t && (f.gratitude[k] || []).some(Boolean)).sort().reverse();
+      openSheet('Dnevnik zahvalnosti', ks.map(k => `<div class="f-gh"><b>${shortDate(k)}</b>${f.gratitude[k].filter(Boolean).map(x => `<div>· ${esc(x)}</div>`).join('')}</div>`).join(''));
+    };
+  }
+  if (seg === 'molitva') {
+    document.getElementById('rosGo').onclick = () => { ui.rosary = { kind: mysteryOfDay(t), i: 0, c: 0 }; window.scrollTo(0, 0); render(); };
+    document.getElementById('rosOther').onclick = ev => { const b = ev.target.closest('[data-k]'); if (b) { ui.rosary = { kind: b.dataset.k, i: 0, c: 0 }; window.scrollTo(0, 0); render(); } };
+  }
+  if (seg === 'nakane') {
+    const inp = document.getElementById('nkAdd');
+    const add = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return toast('Prvo upiši nakanu ✍️'); } f.intentions.push({ id: uid(), text: v, created: t, answered: false }); save(); render(); };
+    document.getElementById('nkAddB').onclick = add; inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); add(); } };
+    view.querySelectorAll('[data-nk]').forEach(el => el.onclick = ev => {
+      const it = f.intentions.find(x => x.id === el.dataset.nk); if (!it) return;
+      if (ev.target.closest('[data-ans]')) return openAnsweredSheet(it);
+      openSheet('Nakana', `<div class="field"><label>Tekst</label><input id="f-text" value="${esc(it.text)}" autocomplete="off"></div>
+        ${it.answered ? `<button class="btn ghost" id="f-un">Vrati među otvorene</button>` : `<button class="btn ghost" id="f-ans">🙏 Uslišano</button>`}
+        <button class="btn" id="f-save">Spremi</button><button class="btn danger" id="f-del">Obriši</button>`);
+      document.getElementById('f-save').onclick = () => { const v = document.getElementById('f-text').value.trim(); if (v) it.text = v; save(); closeSheet(); render(); };
+      document.getElementById('f-del').onclick = () => { f.intentions = f.intentions.filter(x => x !== it); save(); closeSheet(); render(); };
+      const un = document.getElementById('f-un'); if (un) un.onclick = () => { it.answered = false; it.answeredDate = null; save(); closeSheet(); render(); };
+      const an = document.getElementById('f-ans'); if (an) an.onclick = () => { closeSheet(); setTimeout(() => openAnsweredSheet(it), 300); };
+    });
+  }
+}
+function openAnsweredSheet(it) {
+  openSheet('🙏 Uslišano', `<div class="note" style="margin:0 0 12px">„${esc(it.text)}”</div>
+    <div class="field"><label>Kako? (neobavezno)</label><input id="f-note" placeholder="jedna rečenica za sjećanje" autocomplete="off"></div>
+    <button class="btn" id="f-ok">Hvala, Bože 🙏</button>`);
+  document.getElementById('f-ok').onclick = () => { it.answered = true; it.answeredDate = todayStr(); it.note = document.getElementById('f-note').value.trim(); save(); closeSheet(); render(); toast('🙏 Zapisano među uslišane'); };
+}
+function renderRosary() {
+  const R = ui.rosary, steps = rosarySteps(R.kind), s = steps[R.i];
+  setHeader('Krunica', MYSTERIES[R.kind][0], { back: true });
+  const decs = [0, 1, 2, 3, 4].map(d => `<i class="${s.dec === d ? 'now' : (s.dec !== undefined ? d < s.dec : R.i > 4 && R.i >= steps.length - 2) ? 'ok' : ''}"></i>`).join('');
+  view.innerHTML = `<div class="ros">
+    <div class="ros-top"><span>${R.i + 1} / ${steps.length}</span><span class="ros-decs">${decs}</span></div>
+    <div class="card ros-card">
+      ${s.sub ? `<div class="kicker">${esc(s.sub)}</div>` : ''}
+      <div class="ros-t">${esc(s.t)}</div>
+      ${s.big ? `<div class="ros-big">${esc(s.big)}</div>` : ''}
+      <div class="ros-x">${esc(s.x).replace(/\n/g, '<br>')}</div>
+      ${s.n ? `<div class="ros-beads">${Array.from({ length: s.n }, (_, k) => `<i class="${k < R.c ? 'on' : ''}"></i>`).join('')}</div>` : ''}
+    </div>
+    ${s.n ? `<button class="ros-tap" id="rosTap">${R.c < s.n ? `Zdravo Marijo · ${R.c + 1}.` : 'Dalje →'}</button>` : `<button class="ros-tap" id="rosNext">${s.last ? 'Amen ✓' : 'Dalje →'}</button>`}
+    <div class="ros-nav"><button id="rosPrev" ${R.i ? '' : 'disabled'}>← Natrag</button><button id="rosEnd">Završi</button></div>
+  </div>`;
+  const next = () => {
+    if (s.last) { const f = faithInit(), t = todayStr(); (f.rhythm[t] ||= {}).krunica = true; save(); ui.rosary = null; ui.faithSeg = 'danas'; window.scrollTo(0, 0); render(); toast('📿 Krunica izmoljena. Mir s tobom.'); return; }
+    R.i++; R.c = 0; window.scrollTo(0, 0); render();
+  };
+  const tap = document.getElementById('rosTap'); if (tap) tap.onclick = () => { if (R.c < s.n) { R.c++; if (navigator.vibrate) navigator.vibrate(12); render(); } else next(); };
+  const nx = document.getElementById('rosNext'); if (nx) nx.onclick = next;
+  document.getElementById('rosPrev').onclick = () => { if (R.i) { R.i--; R.c = 0; render(); } };
+  document.getElementById('rosEnd').onclick = () => { ui.rosary = null; render(); };
+}
 
 /* ===================== NO-BUY IZAZOV ===================== */
 const CH_RULES = 'Smije: namirnice s popisa, režije, prijevoz, lijekovi, rate, faks. Ne smije: odjeća, kozmetika „usput”, gadgeti, dostava, sitnice „jer je akcija”.';
@@ -3506,7 +3704,8 @@ backBtn.onclick = () => {
   else if (ui.course) ui.course = null;
   else if (ui.project) ui.project = null;
   else if (ui.cashflow) ui.cashflow = false;
-  else if (ui.tab === 'postavke' || ui.tab === 'moments' || ui.tab === 'liste') ui.tab = 'home';
+  else if (ui.rosary) ui.rosary = null;
+  else if (ui.tab === 'postavke' || ui.tab === 'moments' || ui.tab === 'liste' || ui.tab === 'vjera') ui.tab = 'home';
   window.scrollTo(0, 0); render();
 };
 fab.onclick = () => {
