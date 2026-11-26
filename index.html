@@ -379,6 +379,34 @@
 .wi-sel{flex:1;min-width:0;padding:8px;border:1px solid var(--ink);background:transparent;color:inherit;font:inherit;font-size:13px}
 #cfDays{margin-top:-4px}
 
+.fk-sub{margin:-4px 0 12px}
+.fk-hero{background:var(--night);color:#F6EFE6;border:0}.fk-hero .kicker{color:#FFD2B0}
+.fk-big{font-family:'Bodoni Moda',serif;font-size:52px;line-height:1;margin:8px 0 10px}.fk-big span{font-size:18px;font-style:italic;opacity:.75;margin-left:6px}
+.fk-hero .progress{background:rgba(246,239,230,.18)}
+.fk-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.fk-stats i{display:block;font-style:normal;font-size:11px;letter-spacing:.06em;text-transform:uppercase;opacity:.7}.fk-stats b{font-family:'Space Mono',monospace;font-size:18px}
+.ft-row{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;background:none;border:0;border-top:1px solid var(--line);text-align:left;color:inherit}
+.ft-row:first-child{border-top:0}.ft-row.closed{opacity:.55}
+.ft-ic{font-size:20px;width:26px;text-align:center}.ft-main{flex:1;min-width:0;display:flex;flex-direction:column}.ft-main b{font-size:15px}.ft-main i{font-style:normal;font-size:12px;color:var(--muted);margin-top:2px}
+.ft-side{display:flex;flex-direction:column;align-items:flex-end;gap:2px}.ft-side em{font-style:normal;font-size:11px;font-weight:600}
+.ft-cd{font-family:'Space Mono',monospace;font-size:13px}.ft-cd.soon{color:var(--orange)}.ft-cd.late{color:#d33}
+.fk-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px}
+.fk-sel{width:100%;padding:10px;border:1.5px solid var(--ink);background:var(--surface);color:inherit;font:inherit;font-size:14px}
+.fk-years button{display:flex;flex-direction:column;align-items:center;gap:1px}.fk-years small{font-size:10px;opacity:.7;font-family:'Space Mono',monospace}
+.fk-subj{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px 12px 0;background:none;border:0;border-top:1px solid var(--line);text-align:left;color:inherit}
+.fk-subj:first-child{border-top:0}.fk-subj .bar{width:4px;align-self:stretch;margin-left:0}
+.fk-subj .m{flex:1;min-width:0;display:flex;flex-direction:column}.fk-subj b{font-size:15px}.fk-subj i{font-style:normal;font-size:12px;color:var(--muted);margin-top:2px}
+.fk-subj .st{font-size:11px;font-weight:700;border:1.5px solid;padding:3px 7px;white-space:nowrap}
+.fk-irow{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:14px}
+.fk-grade{display:flex;align-items:center;gap:8px;margin-top:12px}.fk-grade span{font-size:13px;color:var(--muted);margin-right:4px}
+.fk-grade button{width:40px;height:40px;border:1.5px solid var(--ink);background:none;color:inherit;font-family:'Bodoni Moda',serif;font-size:20px}.fk-grade button.on{background:var(--green);border-color:var(--green);color:#fff}
+.fk-pt{display:flex;justify-content:space-between;width:100%;padding:8px 0;border:0;border-top:1px solid var(--line);background:none;color:inherit;font-size:14px;text-align:left}
+.fk-pt:first-child{border-top:0}.fk-pt b{font-family:'Space Mono',monospace;font-size:13px}.fk-pt.tot{font-weight:700;border-top:1.5px solid var(--ink)}
+.fk-link{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-top:1px solid var(--line)}.fk-link:first-child{border-top:0}
+.fk-link a{color:var(--blue);text-decoration:none;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.fk-link button{background:none;border:0;color:var(--muted)}
+.fk-remind{margin:14px 0 0;padding:4px 0;border-left:4px solid var(--blue)}
+.fk-remind button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;background:none;border:0;color:inherit;text-align:left}
+.fk-remind button>span:first-child{font-size:20px}.fk-remind button>span:nth-child(2){flex:1;display:flex;flex-direction:column}.fk-remind i{font-style:normal;font-size:12px;color:var(--muted)}
+.fk-remind em{font-style:normal;font-family:'Space Mono',monospace;font-size:13px;font-weight:700}.fk-remind em.hot{color:var(--orange)}
 .f-read{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;margin-top:12px}
 .f-read>span:first-child{font-size:24px}.f-read>span:nth-child(2){flex:1;display:flex;flex-direction:column}.f-read b{font-size:16px}.f-read i{font-style:normal;font-size:12px;color:var(--muted)}
 .fr-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-top:1px solid var(--line,rgba(0,0,0,.08))}
@@ -781,7 +809,11 @@ function renderHome() {
 
   let learnTitle = 'Dodaj kolegije i tečajeve', learnPct = null;
   if (activeCourses.length) { learnTitle = esc(activeCourses[0].name); learnPct = courseProgress(activeCourses[0]); }
-  else if (nextFaks) learnTitle = `${esc(eventLabel(nextFaks.e))} · ${countdown(nextFaks.d)}`;
+  else {
+    const nt = (state.faksTasks || []).filter(t => taskOpen(t) && taskKey(t) && taskKey(t) >= today).sort((a, b) => taskKey(a).localeCompare(taskKey(b)))[0];
+    if (nt && (!nextFaks || taskKey(nt) <= nextFaks.d)) learnTitle = `${esc(nt.title)} · ${countdown(taskKey(nt))}`;
+    else if (nextFaks) learnTitle = `${esc(eventLabel(nextFaks.e))} · ${countdown(nextFaks.d)}`;
+  }
 
   view.innerHTML = `
     <button class="card hero" id="heroCard" style="display:block;width:100%;text-align:left">
@@ -836,6 +868,7 @@ function renderHome() {
       ${faithTileHtml()}
     </div>
 
+    ${faksReminderHtml()}
     ${topTodayHtml()}
     ${challengeHtml()}
     ${listsStrip()}
@@ -864,6 +897,7 @@ function renderHome() {
   bindVerse();
   bindListsHome();
   bindChallenge();
+  view.querySelectorAll('[data-ftask]').forEach(b => b.onclick = () => { const t = state.faksTasks.find(x => x.id === b.dataset.ftask); if (t) openTaskSheet(t); });
   document.getElementById('q-voice').onclick = openSmartSheet;
   document.getElementById('q-ev').onclick = () => openEventSheet(null, { date: today });
   document.getElementById('q-mo').onclick = () => openMomentSheet();
@@ -3041,24 +3075,7 @@ function renderLearning() {
   const today = todayStr();
 
   if (seg === 'faks') {
-    const upcoming = occs(today, addDays(today, 365), e => e.cat === 'faks').filter(o => !o.done).slice(0, 6);
-    const cards = state.subjects.map(s => {
-      const next = occs(today, addDays(today, 365), e => e.subjectId === s.id).find(o => !o.done);
-      return `<button class="scard" data-sid="${s.id}">
-        <span class="dot" style="background:${s.color}"></span>
-        <div class="nm">${esc(s.name)}</div>
-        <div class="mt">${next ? `${esc(next.e.title)} · <span style="color:${s.color};font-weight:650">${countdown(next.d)}</span>` : 'Nema nadolazećih rokova'}</div>
-      </button>`;
-    }).join('');
-    view.innerHTML = `${segHtml}
-      <div class="sec-head" style="margin-top:4px"><span class="section-title">Nadolazeći rokovi</span></div>
-      <div class="card tight">${upcoming.length ? upcoming.map(o => eventRow(o, true, true)).join('') : emptyArt('books', 'nema rokova', 'Ispite i kolokvije dodaješ na +')}</div>
-      <div class="sec-head"><span class="section-title">Kolegiji</span><button class="link-btn" id="addSubj">+ Kolegij</button></div>
-      ${state.subjects.length ? `<div class="grid2">${cards}</div>` : `<div class="card">${emptyArt('books', 'dodaj kolegije', 'Svaki kolegij ima svoje rokove i bilješke.')}</div>`}
-    `;
-    document.getElementById('addSubj').onclick = () => openSubjectSheet();
-    view.querySelectorAll('[data-sid]').forEach(b => b.onclick = () => { ui.subject = b.dataset.sid; window.scrollTo(0, 0); render(); });
-    bindEventRows();
+    renderFaks(segHtml);
   } else {
     const active = state.courses.filter(c => !c.archived);
     const done = state.courses.filter(c => c.archived);
@@ -3090,36 +3107,264 @@ function courseCard(c) {
   </button>`;
 }
 
+/* ===================== FAKS – cijeli studij ===================== */
+const STUDY = { name: 'Informacijske tehnologije', school: 'Veleučilište Baltazar Zaprešić', years: 3, ects: 180 };
+const SUBJ_STATUS = [['nije', 'nije krenuo', '#8A8790'], ['tijek', 'u tijeku', '#1234D9'], ['ceka', 'čeka ispit', '#FF6500'], ['polozen', 'položen', '#12805c'], ['nepolozen', 'nepoložen', '#d33']];
+const TASK_TYPES = [['predrok', 'Predrok', '🎯'], ['rok', 'Ispitni rok', '📝'], ['pismeni', 'Pismeni', '✍️'], ['usmeni', 'Usmeni', '🗣️'], ['kolokvij', 'Kolokvij', '📋'], ['kviz', 'Kviz', '❓'], ['prakticni', 'Praktični rad', '🛠️'], ['zadaca', 'Zadaća', '📄'], ['seminar', 'Seminar', '🎤'], ['timski', 'Timski zadatak', '👥'], ['prijava', 'Prijava ispita', '🔔'], ['ostalo', 'Ostalo', '📌']];
+const TASK_STATUS = [['todo', 'za napraviti', '#8A8790'], ['tijek', 'u tijeku', '#1234D9'], ['predano', 'predano', '#3BA3E0'], ['polozeno', 'položeno', '#12805c'], ['pao', 'pao', '#d33']];
+const semName = n => `${n}. semestar · ${n % 2 ? 'zimski' : 'ljetni'}`;
+const sStat = id => SUBJ_STATUS.find(x => x[0] === id) || SUBJ_STATUS[0];
+const tType = id => TASK_TYPES.find(x => x[0] === id) || TASK_TYPES[TASK_TYPES.length - 1];
+const tStat = id => TASK_STATUS.find(x => x[0] === id) || TASK_STATUS[0];
+const taskKey = t => t.due || t.date || '';
+const taskOpen = t => t.status === 'todo' || t.status === 'tijek' || !t.status;
+
+const FAKS_SEED = [
+  [1, 'Matematika I', '', 'polozen'], [1, 'Uvod u informacijsko-komunikacijske tehnologije', '', 'polozen'], [1, 'Osnove programiranja', 'prof. Cerinski', 'nepolozen'],
+  [2, 'Matematika II', '', 'polozen'], [2, 'Engleski jezik za IT 1', '', 'polozen'], [2, 'Operacijski sustavi', 'prof. Cerinski', 'polozen'], [2, 'Strukture podataka i algoritmi', 'prof. Cerinski', 'nepolozen'],
+  [3, 'Projektiranje informacijskih sustava', 'prof. Vladimir Šimović', 'polozen', { grade: 4, notes: 'Prijavljen rok samo za upis ocjene.' }],
+  [3, 'Osnove menadžmenta', 'dr. sc. Sendi Deželić', 'ceka'],
+  [3, 'Komunikacijski sustavi i mreže', 'prof. Danijel Ptičar', 'tijek'],
+  [3, 'Objektno programiranje', 'izv. prof. Matija Varga', 'nije', { nastava: '7.–19. 12. 2026. i 4.–9. 1. 2027.' }],
+  [3, 'Web programiranje', 'izv. prof. Matija Varga', 'nije', { nastava: '11.–30. 1. 2027.' }],
+  [3, 'Engleski jezik za IT 2', 'Gabrijela Čepo', 'nije', { nastava: '15.–27. 2. 2027.' }],
+  [4, 'Modeliranje poslovnih procesa', '', 'nije', { notes: 'Semestar nije potvrđen – provjeri u Studomatu.' }],
+  [5, 'Projektni menadžment', '', 'nije'], [5, 'Poslovna inteligencija', '', 'nije'], [5, 'Pravni aspekti elektroničkog poslovanja', '', 'nije'], [5, 'Osnove financiranja poduzeća', '', 'nije'], [5, 'Informacijske tehnologije u poduzetništvu', '', 'nije'], [5, 'Sigurnost IKT', '', 'nije'],
+  [6, 'Upravljanje rizicima', '', 'nije'], [6, 'Završni rad', '', 'nije']
+];
+const SUBJ_ALIAS = { asp: 'strukture podataka i algoritmi', spa: 'strukture podataka i algoritmi', 'algoritmi i strukture podataka': 'strukture podataka i algoritmi', os: 'operacijski sustavi', pris: 'projektiranje informacijskih sustava', pis: 'projektiranje informacijskih sustava', ksm: 'komunikacijski sustavi i mreže', 'programiranje': 'osnove programiranja', oop: 'objektno programiranje' };
+function normName(n) { return (n || '').toLowerCase().replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim(); }
+function tokKey(n) { return normName(n).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').split(/[^a-z0-9]+/).filter(w => w && !['i', 'u', 'za', 'od'].includes(w)).sort().join(' '); }
+function faksMigrate(s) {
+  s.faksTasks ||= [];
+  if (s.faksSeeded) return;
+  const subs = s.subjects;
+  FAKS_SEED.forEach(([sem, name, prof, status, extra], i) => {
+    const k = tokKey(name);
+    let ex = subs.find(x => !x._m && (tokKey(x.name) === k || tokKey(SUBJ_ALIAS[normName(x.name)] || '') === k));
+    if (ex) {
+      ex._m = true;
+      ex.sem ??= sem; ex.prof ||= prof; ex.status ||= status;
+      if (extra) { if (extra.grade && !ex.grade) ex.grade = extra.grade; if (extra.nastava && !ex.nastava) ex.nastava = extra.nastava; if (extra.notes && !(ex.notes || '').includes(extra.notes)) ex.notes = ((ex.notes || '') + (ex.notes ? '\n' : '') + extra.notes); }
+    } else subs.push({ id: uid(), name, color: PALETTE[(subs.length) % PALETTE.length], notes: (extra && extra.notes) || '', sem, prof, status, grade: (extra && extra.grade) || null, nastava: (extra && extra.nastava) || '', ects: null, points: [], links: [], _m: true });
+  });
+  subs.forEach(x => { delete x._m; x.points ||= []; x.links ||= []; x.status ||= 'nije'; if (x.sem === undefined) x.sem = null; });
+  const by = n => subs.find(x => tokKey(x.name) === tokKey(n));
+  const add = (n, t) => { const sj = by(n); if (sj && !s.faksTasks.some(x => normName(x.title) === normName(t.title))) s.faksTasks.push({ id: uid(), subjectId: sj.id, created: Date.now(), remind: [3, 1], max: null, got: null, note: '', date: '', time: '', due: '', dueTime: '', status: 'todo', ...t }); };
+  add('Komunikacijski sustavi i mreže', { type: 'prakticni', title: 'Praktični rad 2 (Packet Tracer)', due: '2026-11-28', dueTime: '12:00', status: 'predano' });
+  add('Komunikacijski sustavi i mreže', { type: 'pismeni', title: 'Pismeni ispit / predrok', note: 'Vjerojatno sredina prosinca – upiši datum kad bude poznat.' });
+  add('Osnove menadžmenta', { type: 'rok', title: 'Idući rok: pismeni + usmeni', note: 'Za usmeni treba eksterna USB kamera + mobitel.' });
+  add('Osnove programiranja', { type: 'predrok', title: 'Predrok (siječanj)', note: 'Upiši točan datum kad bude objavljen.' });
+  s.faksSeeded = true;
+}
+function faksStats() {
+  const subs = state.subjects.filter(s => s.sem);
+  const passed = subs.filter(s => s.status === 'polozen');
+  const graded = passed.filter(s => s.grade >= 2);
+  const avg = graded.length ? graded.reduce((a, s) => a + s.grade, 0) / graded.length : null;
+  const ects = passed.reduce((a, s) => a + (+s.ects || 0), 0);
+  return { total: subs.length, passed: passed.length, avg, ects, graded: graded.length };
+}
+function currentSem() { const sems = state.subjects.filter(s => s.sem && (s.status === 'tijek' || s.status === 'ceka')).map(s => s.sem); return sems.length ? Math.max(...sems) : 3; }
+function taskRow(t, showSubj) {
+  const sj = subjectById(t.subjectId), k = taskKey(t), ty = tType(t.type), st = tStat(t.status);
+  const n = k ? daysUntil(k) : null, open = taskOpen(t);
+  const when = k ? `${shortDate(k)}${(t.due ? t.dueTime : t.time) ? ' ' + (t.due ? t.dueTime : t.time) : ''}` : 'datum nije upisan';
+  const cd = !k || !open ? '' : n < 0 ? `<b class="ft-cd late">kasni ${-n} d</b>` : `<b class="ft-cd ${n <= 3 ? 'soon' : ''}">${n === 0 ? 'danas' : n === 1 ? 'sutra' : n + ' d'}</b>`;
+  return `<button class="ft-row ${open ? '' : 'closed'}" data-task="${t.id}">
+    <span class="ft-ic">${ty[2]}</span>
+    <span class="ft-main"><b>${esc(t.title || ty[1])}</b><i>${showSubj && sj ? `<span style="color:${sj.color}">■</span> ${esc(sj.name)} · ` : ''}${ty[1]} · ${when}${t.max ? ` · ${t.got != null ? fmtPts(t.got) : '–'}/${fmtPts(t.max)} b` : ''}</i></span>
+    <span class="ft-side">${cd}<em style="color:${st[2]}">${st[1]}</em></span></button>`;
+}
+function renderFaks(segHtml) {
+  const fseg = ui.faksSeg || 'pregled', st = faksStats(), today = todayStr();
+  const sub = `<div class="chips fk-sub" id="fkSeg">${[['pregled', 'Pregled'], ['rokovi', 'Svi rokovi'], ['studij', 'Studij']].map(([k, n]) => `<button class="chip ${fseg === k ? 'on' : ''}" data-f="${k}">${n}</button>`).join('')}</div>`;
+  let body = '';
+  if (fseg === 'pregled') {
+    const pct = st.total ? Math.round(st.passed / st.total * 100) : 0;
+    const open = state.faksTasks.filter(taskOpen).sort((a, b) => (taskKey(a) || '9999').localeCompare(taskKey(b) || '9999'));
+    const legacy = occs(today, addDays(today, 365), e => e.cat === 'faks').filter(o => !o.done).slice(0, 4);
+    const cs = currentSem();
+    const curSubs = state.subjects.filter(s => s.sem === cs);
+    body = `<div class="card fk-hero">
+        <div class="kicker">${esc(STUDY.school)} · ${esc(STUDY.name)}</div>
+        <div class="fk-big">${st.passed}<span>/${st.total} položeno</span></div>
+        <div class="progress"><span style="width:${pct}%;background:var(--orange)"></span></div>
+        <div class="fk-stats"><div><i>Prosjek</i><b>${st.avg ? st.avg.toFixed(2).replace('.', ',') : '–'}</b></div><div><i>ECTS</i><b>${st.ects ? st.ects + '/' + STUDY.ects : '–'}</b></div><div><i>Sada</i><b>${cs}. sem.</b></div></div>
+      </div>
+      <div class="sec-head"><span class="section-title">Nadolazeći rokovi</span><button class="link-btn" id="fkAll">Svi →</button></div>
+      <div class="card tight">${open.length ? open.slice(0, 6).map(t => taskRow(t, true)).join('') : `<div class="empty">Nema otvorenih zadataka. 🎉</div>`}</div>
+      ${legacy.length ? `<div class="note" style="margin:10px 0 6px">Iz kalendara:</div><div class="card tight">${legacy.map(o => eventRow(o, true, true)).join('')}</div>` : ''}
+      <div class="sec-head"><span class="section-title">${semName(cs)}</span><button class="link-btn" id="fkStudy">Cijeli studij →</button></div>
+      ${subjList(curSubs)}`;
+  }
+  if (fseg === 'rokovi') {
+    const F = ui.fkFilter ||= { year: '', sem: '', status: 'open', type: '' };
+    let list = state.faksTasks.slice();
+    list = list.filter(t => { const sj = subjectById(t.subjectId); const sem = sj ? sj.sem : null;
+      if (F.year && (!sem || Math.ceil(sem / 2) !== +F.year)) return false;
+      if (F.sem && sem !== +F.sem) return false;
+      if (F.status === 'open' && !taskOpen(t)) return false;
+      if (F.status && F.status !== 'open' && t.status !== F.status) return false;
+      if (F.type && t.type !== F.type) return false; return true; });
+    list.sort((a, b) => (taskKey(a) || '9999').localeCompare(taskKey(b) || '9999'));
+    const sel = (id, val, opts) => `<select class="fk-sel" data-flt="${id}">${opts.map(([v, n]) => `<option value="${v}" ${String(val) === String(v) ? 'selected' : ''}>${n}</option>`).join('')}</select>`;
+    body = `<div class="fk-filters">
+        ${sel('year', F.year, [['', 'Sve godine'], ['1', '1. godina'], ['2', '2. godina'], ['3', '3. godina']])}
+        ${sel('sem', F.sem, [['', 'Svi semestri'], ...[1, 2, 3, 4, 5, 6].map(n => [n, n + '. semestar'])])}
+        ${sel('status', F.status, [['open', 'Otvoreni'], ['', 'Svi statusi'], ...TASK_STATUS.map(([k, n]) => [k, n])])}
+        ${sel('type', F.type, [['', 'Sve vrste'], ...TASK_TYPES.map(([k, n]) => [k, n])])}
+      </div>
+      <div class="note" style="margin:0 0 8px">${list.length} ${plural(list.length, 'zadatak', 'zadatka', 'zadataka')}</div>
+      <div class="card tight">${list.length ? list.map(t => taskRow(t, true)).join('') : `<div class="empty">Ništa za ovaj filter.</div>`}</div>`;
+  }
+  if (fseg === 'studij') {
+    const y = ui.fkYear || Math.ceil(currentSem() / 2);
+    const un = state.subjects.filter(s => !s.sem);
+    body = `<div class="seg fk-years" id="fkYears">${[1, 2, 3].map(n => { const ss = state.subjects.filter(s => s.sem && Math.ceil(s.sem / 2) === n); return `<button data-y="${n}" class="${y === n ? 'on' : ''}">${n}. godina<small>${ss.filter(s => s.status === 'polozen').length}/${ss.length}</small></button>`; }).join('')}</div>
+      ${[y * 2 - 1, y * 2].map(sm => { const ss = state.subjects.filter(s => s.sem === sm); return `<div class="sec-head"><span class="section-title">${sm % 2 ? 'Zimski' : 'Ljetni'} <small style="font-size:14px;color:var(--muted)">· ${sm}. sem.</small></span><button class="link-btn" data-addsem="${sm}">+ Kolegij</button></div>${subjList(ss)}`; }).join('')}
+      ${un.length ? `<div class="sec-head"><span class="section-title">Nerazvrstano</span></div><div class="note" style="margin:-4px 0 8px">Kolegiji bez semestra – otvori i odaberi semestar u ✎.</div>${subjList(un)}` : ''}`;
+  }
+  view.innerHTML = segHtml + sub + body;
+  document.getElementById('fkSeg').onclick = ev => { const b = ev.target.closest('[data-f]'); if (b) { ui.faksSeg = b.dataset.f; render(); } };
+  const a = document.getElementById('fkAll'); if (a) a.onclick = () => { ui.faksSeg = 'rokovi'; render(); };
+  const s2 = document.getElementById('fkStudy'); if (s2) s2.onclick = () => { ui.faksSeg = 'studij'; render(); };
+  const fy = document.getElementById('fkYears'); if (fy) fy.onclick = ev => { const b = ev.target.closest('[data-y]'); if (b) { ui.fkYear = +b.dataset.y; render(); } };
+  view.querySelectorAll('[data-flt]').forEach(el => el.onchange = () => { ui.fkFilter[el.dataset.flt] = el.value; render(); });
+  view.querySelectorAll('[data-addsem]').forEach(b => b.onclick = () => openSubjectSheet(null, +b.dataset.addsem));
+  view.querySelectorAll('[data-sid]').forEach(b => b.onclick = () => { ui.subject = b.dataset.sid; window.scrollTo(0, 0); render(); });
+  view.querySelectorAll('[data-task]').forEach(b => b.onclick = () => { const t = state.faksTasks.find(x => x.id === b.dataset.task); if (t) openTaskSheet(t); });
+  bindEventRows();
+}
+function subjList(ss) {
+  if (!ss.length) return `<div class="card"><div class="empty">Nema kolegija.</div></div>`;
+  return `<div class="card tight">${ss.map(s => { const st = sStat(s.status); const open = state.faksTasks.filter(t => t.subjectId === s.id && taskOpen(t)); const next = open.filter(taskKey).sort((a, b) => taskKey(a).localeCompare(taskKey(b)))[0];
+    return `<button class="fk-subj" data-sid="${s.id}"><span class="bar" style="background:${s.color}"></span><span class="m"><b>${esc(s.name)}</b><i>${[s.prof ? esc(s.prof) : '', next ? `${tType(next.type)[1]} ${countdown(taskKey(next))}` : open.length ? `${open.length} otvoreno` : s.nastava ? 'nastava ' + esc(s.nastava) : ''].filter(Boolean).join(' · ')}</i></span><span class="st" style="color:${st[2]};border-color:${st[2]}">${s.status === 'polozen' && s.grade ? s.grade : st[1]}</span></button>`; }).join('')}</div>`;
+}
 function renderSubject() {
   const s = subjectById(ui.subject);
   if (!s) { ui.subject = null; return render(); }
-  setHeader(s.name, 'Kolegij', { back: true, btn: { ico: 'pencil', label: 'Uredi kolegij', onclick: () => openSubjectSheet(s) } });
+  s.points ||= []; s.links ||= [];
+  setHeader(s.name, s.sem ? `${Math.ceil(s.sem / 2)}. godina · ${semName(s.sem)}` : 'Kolegij', { back: true, btn: { ico: 'pencil', label: 'Uredi kolegij', onclick: () => openSubjectSheet(s) } });
   const today = todayStr();
+  const tasks = state.faksTasks.filter(t => t.subjectId === s.id).sort((a, b) => (taskKey(a) || '9999').localeCompare(taskKey(b) || '9999'));
+  const openT = tasks.filter(taskOpen), doneT = tasks.filter(t => !taskOpen(t));
   const list = state.events.filter(e => e.subjectId === s.id).map(e => ({ e, d: e.date, done: isDone(e, e.date) }));
   const up = list.filter(o => o.d >= today).sort((a, b) => a.d.localeCompare(b.d));
-  const past = list.filter(o => o.d < today).sort((a, b) => b.d.localeCompare(a.d));
+  const ptsTasks = tasks.filter(t => t.max > 0), ptsExtra = s.points.filter(p => p.max > 0 || p.got > 0);
+  const gotSum = ptsTasks.reduce((a, t) => a + (+t.got || 0), 0) + s.points.reduce((a, p) => a + (+p.got || 0), 0);
+  const maxSum = ptsTasks.reduce((a, t) => a + (+t.max || 0), 0) + s.points.reduce((a, p) => a + (+p.max || 0), 0);
   view.innerHTML = `
-    <div class="sec-head" style="margin-top:6px"><span class="section-title">Rokovi</span><button class="link-btn" id="addRok">+ Rok</button></div>
-    <div class="card tight">
-      ${up.length ? up.map(o => eventRow(o, true, true)).join('') : `<div class="empty">Nema nadolazećih rokova.</div>`}
-      ${past.length ? `<div class="date-head">Prošlo</div>${past.map(o => eventRow(o, true)).join('')}` : ''}
+    <div class="card fk-info">
+      <div class="fk-irow">${s.prof ? `<span>👤 ${esc(s.prof)}</span>` : ''}${s.ects ? `<span>${s.ects} ECTS</span>` : ''}${s.nastava ? `<span>📅 nastava ${esc(s.nastava)}</span>` : ''}${!s.prof && !s.ects && !s.nastava ? '<span class="note" style="margin:0">Profesor, ECTS i nastava – dodaj na ✎</span>' : ''}</div>
+      <div class="chips" id="sjStat" style="margin-top:10px">${SUBJ_STATUS.map(([k, n, c]) => `<button class="chip ${s.status === k ? 'on' : ''}" data-st="${k}" ${s.status === k ? `style="background:${c};border-color:${c};color:#fff"` : ''}>${n}</button>`).join('')}</div>
+      ${s.status === 'polozen' ? `<div class="fk-grade"><span>Ocjena</span>${[1, 2, 3, 4, 5].map(g => `<button data-gr="${g}" class="${s.grade === g ? 'on' : ''}">${g}</button>`).join('')}</div>` : ''}
     </div>
+    <div class="sec-head"><span class="section-title">Zadaci i rokovi</span><button class="link-btn" id="addTask">+ Dodaj</button></div>
+    <div class="card tight">${openT.length ? openT.map(t => taskRow(t)).join('') : `<div class="empty">Nema otvorenih zadataka.</div>`}
+      ${up.length ? `<div class="date-head">Iz kalendara</div>${up.map(o => eventRow(o, true, true)).join('')}` : ''}
+      ${doneT.length ? `<div class="date-head">Završeno</div>${doneT.map(t => taskRow(t)).join('')}` : ''}</div>
+    <div class="sec-head"><span class="section-title">Bodovi</span><button class="link-btn" id="addPts">+ Stavka</button></div>
+    <div class="card">
+      ${ptsTasks.map(t => `<div class="fk-pt"><span>${tType(t.type)[2]} ${esc(t.title)}</span><b>${t.got != null ? fmtPts(t.got) : '–'} / ${fmtPts(t.max)}</b></div>`).join('')}
+      ${s.points.map(p => `<button class="fk-pt" data-pt="${p.id}"><span>${esc(p.label)}</span><b>${p.got != null ? fmtPts(p.got) : '–'} / ${p.max != null ? fmtPts(p.max) : '–'}</b></button>`).join('')}
+      ${ptsTasks.length || s.points.length ? `<div class="fk-pt tot"><span>Ukupno</span><b>${fmtPts(gotSum)} / ${fmtPts(maxSum)}${maxSum ? ` · ${Math.round(gotSum / maxSum * 100)} %` : ''}</b></div>` : `<div class="note" style="margin:0">Bodovi iz zadataka (kad upišeš max/osvojeno) zbrajaju se ovdje. Za ostalo (npr. aktivnost) dodaj stavku.</div>`}
+    </div>
+    <div class="sec-head"><span class="section-title">Materijali</span><button class="link-btn" id="addLink">+ Link</button></div>
+    <div class="card tight">${s.links.length ? s.links.map(l => `<div class="fk-link"><a href="${esc(l.url)}" target="_blank" rel="noopener">🔗 ${esc(l.label || l.url)}</a><button data-dl="${l.id}" aria-label="Makni">✕</button></div>`).join('') : `<div class="empty">Merlin, Teams, skripte, snimke predavanja…</div>`}</div>
     <div class="sec-head"><span class="section-title">Bilješke</span><span class="note" id="savedNote" style="margin:0"></span></div>
-    <div class="card"><textarea class="notes-area" id="notes" placeholder="Gradivo, što trebam ponoviti, linkovi, dojmovi s predavanja…">${esc(s.notes || '')}</textarea></div>
-  `;
-  document.getElementById('addRok').onclick = () => openEventSheet(null, { cat: 'faks', subjectId: s.id, date: today });
+    <div class="card"><textarea class="notes-area" id="notes" placeholder="Gradivo, što trebam ponoviti, dojmovi s predavanja…">${esc(s.notes || '')}</textarea></div>`;
+  document.getElementById('sjStat').onclick = ev => { const b = ev.target.closest('[data-st]'); if (!b) return; s.status = b.dataset.st; save(); render(); if (s.status === 'polozen') toast('🎉 Bravo! Upiši ocjenu.'); };
+  view.querySelectorAll('[data-gr]').forEach(b => b.onclick = () => { s.grade = +b.dataset.gr; save(); render(); });
+  document.getElementById('addTask').onclick = () => openTaskSheet(null, s.id);
+  view.querySelectorAll('[data-task]').forEach(b => b.onclick = () => { const t = state.faksTasks.find(x => x.id === b.dataset.task); if (t) openTaskSheet(t); });
+  document.getElementById('addPts').onclick = () => openPointSheet(s);
+  view.querySelectorAll('[data-pt]').forEach(b => b.onclick = () => openPointSheet(s, s.points.find(p => p.id === b.dataset.pt)));
+  document.getElementById('addLink').onclick = () => {
+    openSheet('Novi link', `<div class="field"><label>Naziv</label><input id="f-l" placeholder="npr. Predavanja – Merlin" autocomplete="off"></div><div class="field"><label>URL</label><input id="f-u" inputmode="url" placeholder="https://…" autocomplete="off"></div><button class="btn" id="f-save">Spremi</button>`);
+    document.getElementById('f-save').onclick = () => { let u = document.getElementById('f-u').value.trim(); if (!u) return toast('Upiši link'); if (!/^https?:\/\//i.test(u)) u = 'https://' + u; s.links.push({ id: uid(), label: document.getElementById('f-l').value.trim(), url: u }); save(); closeSheet(); render(); };
+  };
+  view.querySelectorAll('[data-dl]').forEach(b => b.onclick = () => { s.links = s.links.filter(l => l.id !== b.dataset.dl); save(); render(); });
   bindNotes(document.getElementById('notes'), v => { s.notes = v; });
   bindEventRows();
 }
+function fmtPts(n) { return String(Math.round(n * 100) / 100).replace('.', ','); }
+function openPointSheet(s, p) {
+  openSheet(p ? 'Uredi bodove' : 'Nova stavka bodova', `<div class="field"><label>Naziv</label><input id="f-l" value="${esc(p ? p.label : '')}" placeholder="npr. Aktivnost na nastavi" autocomplete="off"></div>
+    <div class="row2"><div class="field"><label>Osvojeno</label><input id="f-g" inputmode="decimal" value="${p && p.got != null ? String(p.got).replace('.', ',') : ''}"></div><div class="field"><label>Max</label><input id="f-m" inputmode="decimal" value="${p && p.max != null ? String(p.max).replace('.', ',') : ''}"></div></div>
+    <button class="btn" id="f-save">Spremi</button>${p ? '<button class="btn danger" id="f-del">Obriši</button>' : ''}`);
+  const num = id => { const v = parseAmount(document.getElementById(id).value); return isFinite(v) ? v : null; };
+  document.getElementById('f-save').onclick = () => { const label = document.getElementById('f-l').value.trim() || 'Bodovi'; const d = { label, got: num('f-g'), max: num('f-m') }; if (p) Object.assign(p, d); else s.points.push({ id: uid(), ...d }); save(); closeSheet(); render(); };
+  if (p) document.getElementById('f-del').onclick = () => { s.points = s.points.filter(x => x !== p); save(); closeSheet(); render(); };
+}
+function openTaskSheet(t, subjectId) {
+  const isNew = !t;
+  t = t || { type: 'kolokvij', title: '', date: '', time: '', due: '', dueTime: '', max: null, got: null, note: '', status: 'todo', remind: [3, 1], subjectId: subjectId || '' };
+  let type = t.type, status = t.status || 'todo', remind = (t.remind || []).slice();
+  const subOpts = state.subjects.slice().sort((a, b) => (a.sem || 9) - (b.sem || 9) || a.name.localeCompare(b.name)).map(s => `<option value="${s.id}" ${s.id === t.subjectId ? 'selected' : ''}>${s.sem ? s.sem + '. · ' : ''}${esc(s.name)}</option>`).join('');
+  openSheet(isNew ? 'Novi zadatak / rok' : 'Zadatak / rok', `
+    <div class="field"><label>Kolegij</label><select id="f-sj">${subOpts}</select></div>
+    <div class="field"><label>Vrsta</label><div class="chips" id="f-ty">${TASK_TYPES.map(([k, n, e]) => `<button class="chip ${type === k ? 'on' : ''}" data-k="${k}">${e} ${n}</button>`).join('')}</div></div>
+    <div class="field"><label>Naziv</label><input id="f-ti" value="${esc(t.title)}" placeholder="npr. 1. kolokvij" autocomplete="off"></div>
+    <div class="row2"><div class="field"><label>Datum (termin)</label><input id="f-d" type="date" value="${t.date || ''}"></div><div class="field"><label>Vrijeme</label><input id="f-t" type="time" value="${t.time || ''}"></div></div>
+    <div class="row2"><div class="field"><label>Rok predaje</label><input id="f-dd" type="date" value="${t.due || ''}"></div><div class="field"><label>do</label><input id="f-dt" type="time" value="${t.dueTime || ''}"></div></div>
+    <div class="row2"><div class="field"><label>Bodovi osvojeno</label><input id="f-g" inputmode="decimal" value="${t.got != null ? String(t.got).replace('.', ',') : ''}"></div><div class="field"><label>Bodovi max</label><input id="f-m" inputmode="decimal" value="${t.max != null ? String(t.max).replace('.', ',') : ''}"></div></div>
+    <div class="field"><label>Status</label><div class="chips" id="f-st">${TASK_STATUS.map(([k, n]) => `<button class="chip ${status === k ? 'on' : ''}" data-k="${k}">${n}</button>`).join('')}</div></div>
+    <div class="field"><label>Podsjetnik (dana prije)</label><div class="chips" id="f-rm">${[7, 3, 1, 0].map(n => `<button class="chip ${remind.includes(n) ? 'on' : ''}" data-n="${n}">${n === 0 ? 'na dan' : n + ' ' + plural(n, 'dan', 'dana', 'dana')}</button>`).join('')}</div></div>
+    <div class="field"><label>Bilješka</label><textarea id="f-no" rows="3" placeholder="npr. treba USB kamera, gradivo 1.–5. predavanje">${esc(t.note || '')}</textarea></div>
+    <button class="btn" id="f-save">Spremi</button>
+    ${!isNew ? `<button class="btn ghost" id="f-ics">📅 Dodaj u iPhone kalendar s podsjetnicima</button><button class="btn danger" id="f-del">Obriši</button>` : ''}`);
+  const chipSel = (id, cb, multi) => { const el = document.getElementById(id); el.onclick = ev => { const b = ev.target.closest('.chip'); if (!b) return; if (multi) { b.classList.toggle('on'); } else { el.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === b)); } cb(b); }; };
+  chipSel('f-ty', b => { type = b.dataset.k; });
+  chipSel('f-st', b => { status = b.dataset.k; });
+  chipSel('f-rm', b => { const n = +b.dataset.n; remind = remind.includes(n) ? remind.filter(x => x !== n) : [...remind, n]; }, true);
+  const num = id => { const v = parseAmount(document.getElementById(id).value); return isFinite(v) ? v : null; };
+  document.getElementById('f-save').onclick = () => {
+    const d = { subjectId: document.getElementById('f-sj').value, type, title: document.getElementById('f-ti').value.trim() || tType(type)[1], date: document.getElementById('f-d').value, time: document.getElementById('f-t').value, due: document.getElementById('f-dd').value, dueTime: document.getElementById('f-dt').value, got: num('f-g'), max: num('f-m'), status, remind: remind.sort((a, b) => b - a), note: document.getElementById('f-no').value.trim() };
+    if (isNew) state.faksTasks.push({ id: uid(), created: Date.now(), ...d }); else Object.assign(t, d);
+    save(); closeSheet(); render(); toast(status === 'polozeno' ? '🎉 Položeno!' : 'Spremljeno');
+  };
+  if (!isNew) {
+    document.getElementById('f-del').onclick = () => { if (!confirm('Obrisati ovaj zadatak?')) return; state.faksTasks = state.faksTasks.filter(x => x !== t); save(); closeSheet(); render(); };
+    document.getElementById('f-ics').onclick = () => taskIcs(t);
+  }
+}
+function taskIcs(t) {
+  const k = taskKey(t); if (!k) return toast('Prvo upiši datum');
+  const sj = subjectById(t.subjectId), tm = (t.due ? t.dueTime : t.time) || '';
+  const dt = k.replace(/-/g, '');
+  const p2 = n => String(n).padStart(2, '0');
+  let start, end;
+  if (tm) { const [h, m] = tm.split(':').map(Number); start = `DTSTART;TZID=Europe/Zagreb:${dt}T${p2(h)}${p2(m)}00`; const e = new Date(2000, 0, 1, h + 1, m); end = `DTEND;TZID=Europe/Zagreb:${dt}T${p2(e.getHours())}${p2(e.getMinutes())}00`; }
+  else { const nx = addDays(k, 1).replace(/-/g, ''); start = `DTSTART;VALUE=DATE:${dt}`; end = `DTEND;VALUE=DATE:${nx}`; }
+  const esc2 = s => (s || '').replace(/[\\,;]/g, m => '\\' + m).replace(/\n/g, '\\n');
+  const alarms = (t.remind || []).map(n => `BEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:${esc2(t.title)}\r\nTRIGGER:-P${n}D${tm ? '' : 'T0H'}\r\nEND:VALARM`.replace('-P0DT0H', '-PT0M').replace('-P0D', '-PT0M')).join('\r\n');
+  const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//The Iva Edit//Faks//HR', 'BEGIN:VEVENT', `UID:${t.id}@iva-edit`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`, start, end, `SUMMARY:${esc2((sj ? sj.name + ': ' : '') + t.title)}`, `DESCRIPTION:${esc2(tType(t.type)[1] + (t.note ? ' – ' + t.note : ''))}`, alarms, 'END:VEVENT', 'END:VCALENDAR'].filter(Boolean).join('\r\n');
+  const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  const a = document.createElement('a'); a.href = url; a.download = (t.title || 'rok').replace(/[^\wčćđšžČĆĐŠŽ -]/g, '') + '.ics'; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+function faksReminderHtml() {
+  const t0 = todayStr();
+  const hits = (state.faksTasks || []).filter(t => taskOpen(t) && taskKey(t)).map(t => ({ t, n: daysUntil(taskKey(t)) })).filter(({ t, n }) => n < 0 || (t.remind || []).includes(n) || n <= Math.min(1, Math.max(...(t.remind || [1])))).sort((a, b) => a.n - b.n).slice(0, 3);
+  if (!hits.length) return '';
+  return `<div class="card fk-remind">${hits.map(({ t, n }) => { const sj = subjectById(t.subjectId); return `<button data-ftask="${t.id}"><span>${tType(t.type)[2]}</span><span><b>${esc(t.title)}</b><i>${sj ? esc(sj.name) : ''}</i></span><em class="${n <= 1 ? 'hot' : ''}">${n < 0 ? 'kasni' : n === 0 ? 'danas' : n === 1 ? 'sutra' : 'za ' + n + ' d'}</em></button>`; }).join('')}</div>`;
+}
+
 function bindNotes(ta, setter) {
   let t;
   ta.oninput = () => { clearTimeout(t); t = setTimeout(() => { setter(ta.value); save(); const n = document.getElementById('savedNote'); if (n) n.textContent = 'Spremljeno'; }, 500); };
 }
 
-function openSubjectSheet(existing) {
+function openSubjectSheet(existing, presetSem) {
   let color = existing ? existing.color : PALETTE[state.subjects.length % PALETTE.length];
+  const e = existing || {};
+  const semOpts = `<option value="">— bez semestra —</option>` + [1, 2, 3, 4, 5, 6].map(n => `<option value="${n}" ${(e.sem || presetSem) === n ? 'selected' : ''}>${Math.ceil(n / 2)}. godina · ${semName(n)}</option>`).join('');
   openSheet(existing ? 'Uredi kolegij' : 'Novi kolegij', `
-    <div class="field"><label>Naziv kolegija</label><input id="f-name" value="${esc(existing ? existing.name : '')}" placeholder="npr. Algoritmi i strukture podataka" autocomplete="off"></div>
+    <div class="field"><label>Naziv kolegija</label><input id="f-name" value="${esc(e.name || '')}" placeholder="npr. Strukture podataka i algoritmi" autocomplete="off"></div>
+    <div class="field"><label>Profesor</label><input id="f-prof" value="${esc(e.prof || '')}" placeholder="npr. prof. Cerinski" autocomplete="off"></div>
+    <div class="field"><label>Godina i semestar</label><select id="f-sem">${semOpts}</select></div>
+    <div class="row2"><div class="field"><label>ECTS</label><input id="f-ects" inputmode="numeric" value="${e.ects || ''}" placeholder="npr. 6"></div><div class="field"><label>Nastava (termin)</label><input id="f-nast" value="${esc(e.nastava || '')}" placeholder="npr. 7.–19. 12." autocomplete="off"></div></div>
     <div class="field"><label>Boja</label>${swatches(color)}</div>
     <button class="btn" id="f-save">Spremi</button>
     ${existing ? `<button class="btn danger" id="f-del">Obriši kolegij</button>` : ''}
@@ -3128,13 +3373,17 @@ function openSubjectSheet(existing) {
   if (!existing) setTimeout(() => document.getElementById('f-name').focus(), 280);
   document.getElementById('f-save').onclick = () => {
     const name = document.getElementById('f-name').value.trim(); if (!name) return toast('Upiši naziv');
-    if (existing) Object.assign(existing, { name, color }); else state.subjects.push({ id: uid(), name, color, notes: '' });
+    const sv = document.getElementById('f-sem').value, ects = parseInt(document.getElementById('f-ects').value, 10);
+    const d = { name, color, prof: document.getElementById('f-prof').value.trim(), sem: sv ? +sv : null, ects: ects > 0 ? ects : null, nastava: document.getElementById('f-nast').value.trim() };
+    if (existing) Object.assign(existing, d); else state.subjects.push({ id: uid(), notes: '', status: 'nije', grade: null, points: [], links: [], ...d });
     save(); closeSheet(); render(); toast('Spremljeno');
   };
   if (existing) document.getElementById('f-del').onclick = () => {
-    if (!confirm(`Obrisati kolegij "${existing.name}" i njegove bilješke? Rokovi ostaju u kalendaru.`)) return;
+    const n = state.faksTasks.filter(t => t.subjectId === existing.id).length;
+    if (!confirm(`Obrisati kolegij "${existing.name}"${n ? ` i njegovih ${n} zadataka` : ''}? Rokovi iz kalendara ostaju.`)) return;
     state.subjects = state.subjects.filter(x => x.id !== existing.id);
-    state.events.forEach(e => { if (e.subjectId === existing.id) e.subjectId = ''; });
+    state.faksTasks = state.faksTasks.filter(t => t.subjectId !== existing.id);
+    state.events.forEach(ev => { if (ev.subjectId === existing.id) ev.subjectId = ''; });
     ui.subject = null; save(); closeSheet(); render(); toast('Obrisano');
   };
 }
@@ -3720,7 +3969,7 @@ fab.onclick = () => {
   else if (ui.tab === 'ucenje') {
     const c = ui.course && courseById(ui.course);
     if (c) { if (ui.courseSeg === 'ucenje') openSessionSheet(c); else if (ui.courseSeg === 'plan') openLessonsSheet(c); else { ui.courseSeg = 'ucenje'; render(); openSessionSheet(c); } }
-    else if (ui.subject || ui.learnSeg === 'faks') openEventSheet(null, { cat: 'faks', subjectId: ui.subject || '', date: todayStr() });
+    else if (ui.subject || ui.learnSeg === 'faks') openTaskSheet(null, ui.subject || '');
     else openCourseSheet();
   }
   else if (ui.tab === 'projekti') {
@@ -3739,6 +3988,7 @@ function setTheme(t) {
 }
 setTheme(document.documentElement.dataset.theme || 'light');
 
+try { const had = !!state.faksSeeded; faksMigrate(state); if (!had) save(); } catch (e) { console.error('faks migrate', e); }
 render();
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
