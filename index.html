@@ -379,6 +379,10 @@
 .wi-sel{flex:1;min-width:0;padding:8px;border:1px solid var(--ink);background:transparent;color:inherit;font:inherit;font-size:13px}
 #cfDays{margin-top:-4px}
 
+.fk-off{margin-top:10px;font-size:12px;opacity:.75;line-height:1.4}
+.fk-pdate{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:10px;font-size:13px;color:var(--muted)}
+.fk-pdate input[type=date]{margin-left:6px;padding:6px;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);font:inherit}
+.fk-ix{display:flex;align-items:center;gap:6px}.fk-ix input{width:18px;height:18px}
 .fk-sub{margin:-4px 0 12px}
 .fk-hero{background:var(--night);color:#F6EFE6;border:0}.fk-hero .kicker{color:#FFD2B0}
 .fk-big{font-family:'Bodoni Moda',serif;font-size:52px;line-height:1;margin:8px 0 10px}.fk-big span{font-size:18px;font-style:italic;opacity:.75;margin-left:6px}
@@ -3157,13 +3161,62 @@ function faksMigrate(s) {
   add('Osnove programiranja', { type: 'predrok', title: 'Predrok (siječanj)', note: 'Upiši točan datum kad bude objavljen.' });
   s.faksSeeded = true;
 }
+const FAKS_V2 = [
+  [1, 'Baze podataka', 'Šimović', 5, 'polozen', 2, '2025-09-19'],
+  [1, 'Građa računala', 'Bilal Zorić, Cerinski', 4, 'polozen', 3, '2024-11-27'],
+  [1, 'Matematika I', 'Bilal Zorić, Cerinski', 6, 'polozen', 3, '2024-11-28'],
+  [1, 'Osnove programiranja', 'Cerinski, Ptičar', 6, 'nepolozen'],
+  [1, 'Uvod u (X)HTML i CSS', 'Varga, Ptičar', 5, 'polozen', 4, '2025-01-31'],
+  [1, 'Uvod u informacijsko-komunikacijske tehnologije', 'Bilal Zorić, Jurina', 4, 'polozen', 4, '2025-10-28'],
+  [2, 'Engleski jezik za IT 1', 'Jurina Babović, Čepo', 3, 'polozen', 4, '2025-09-05'],
+  [2, 'Informacijski sustavi', 'Šimović, Jurina', 5, 'polozen', 3, '2025-09-19'],
+  [2, 'Logika za informatičare', 'Bilal Zorić, Šimović', 5, 'polozen', 5, '2025-09-19'],
+  [2, 'Matematika II', 'Bilal Zorić', 6, 'polozen', 2, '2026-09-28'],
+  [2, 'Operacijski sustavi', 'Šimović, Cerinski', 6, 'polozen', 3, '2026-09-01'],
+  [2, 'Strukture podataka i algoritmi', 'Bilal Zorić, Cerinski', 5, 'nepolozen'],
+  [3, 'Engleski jezik za IT 2', 'Jurina Babović, Čepo', 3, 'nije', null, null, { nastava: '15.–27. 2. 2027.' }],
+  [3, 'Komunikacijski sustavi i mreže', 'Šimović, Ptičar', 6, 'tijek'],
+  [3, 'Objektno programiranje', 'Varga, Ptičar', 6, 'nije', null, null, { nastava: '7.–19. 12. 2026. i 4.–9. 1. 2027.' }],
+  [3, 'Osnove menadžmenta', 'Deželić, Skledar Ćorluka', 4, 'ceka'],
+  [3, 'Projektiranje informacijskih sustava', 'Šimović', 5, 'polozen', 4, null, { notInIndex: true }],
+  [3, 'Web programiranje', 'Varga, Ptičar', 6, 'nije', null, null, { nastava: '11.–30. 1. 2027.' }],
+  [4, 'Digitalna transformacija poslovanja', 'Šimović, Bilić', 5, 'nije'],
+  [4, 'Mobilne aplikacije', 'Šimović, Jelen', 6, 'nije'],
+  [4, 'Poslovno komuniciranje', 'Lacković, Balvan', 4, 'nije'],
+  [4, 'Sistemsko inženjerstvo', 'Šimović', 6, 'nije'],
+  [4, 'Sustavi za upravljanje znanjem', 'Šimović, Jurina', 4, 'nije'],
+  [4, 'Vjerojatnost i statistika', 'Čović, Cunjak Mataković', 5, 'nije']
+];
+function faksMigrateV2(s) {
+  if (s.faksV2) return;
+  const subs = s.subjects;
+  const find = n => { const k = tokKey(n); return subs.find(x => tokKey(x.name) === k || tokKey(SUBJ_ALIAS[normName(x.name)] || '') === k); };
+  const keep = new Set();
+  FAKS_V2.forEach(([sem, name, prof, ects, status, grade, date, extra]) => {
+    let x = find(name);
+    if (!x) { x = { id: uid(), name, color: PALETTE[subs.length % PALETTE.length], notes: '', points: [], links: [] }; subs.push(x); }
+    else if (tokKey(x.name) !== tokKey(name) && /^[A-Z]{2,5}$/.test(x.name.trim())) { /* kratica – zadrži ime */ }
+    Object.assign(x, { sem, prof, ects, status });
+    if (grade) x.grade = grade;
+    if (date) x.passedDate = date;
+    if (extra) { if (extra.nastava) x.nastava = extra.nastava; if (extra.notInIndex) x.notInIndex = true; }
+    if (x.notes && x.notes.includes('Prijavljen rok samo za upis ocjene.')) x.notes = x.notes.replace('Prijavljen rok samo za upis ocjene.', 'Položen – čeka upis ocjene u indeks.');
+    keep.add(x.id);
+  });
+  const mpp = subs.find(x => tokKey(x.name) === tokKey('Modeliranje poslovnih procesa'));
+  if (mpp && !keep.has(mpp.id) && mpp.sem === 4) { mpp.sem = null; if (!(mpp.notes || '').includes('Nije u e-indeksu')) mpp.notes = 'Nije u e-indeksu za 3. i 4. semestar – provjeri ili obriši.'; }
+  const ksm = find('Komunikacijski sustavi i mreže');
+  if (ksm && !s.faksTasks.some(t => /uart|manchester/i.test(t.title))) s.faksTasks.push({ id: uid(), subjectId: ksm.id, created: Date.now(), type: 'kviz', title: 'Kviz dekodiranje (UART + Manchester)', date: '', time: '', due: '', dueTime: '', max: null, got: null, note: '', status: 'predano', remind: [3, 1] });
+  s.faksV2 = true;
+}
 function faksStats() {
   const subs = state.subjects.filter(s => s.sem);
+  const calc = arr => { const g = arr.filter(s => s.grade >= 2); const e = g.filter(s => +s.ects > 0);
+    return { passed: arr.length, ects: arr.reduce((a, s) => a + (+s.ects || 0), 0), avg: g.length ? g.reduce((a, s) => a + s.grade, 0) / g.length : null,
+      wavg: e.length ? e.reduce((a, s) => a + s.grade * s.ects, 0) / e.reduce((a, s) => a + +s.ects, 0) : null }; };
   const passed = subs.filter(s => s.status === 'polozen');
-  const graded = passed.filter(s => s.grade >= 2);
-  const avg = graded.length ? graded.reduce((a, s) => a + s.grade, 0) / graded.length : null;
-  const ects = passed.reduce((a, s) => a + (+s.ects || 0), 0);
-  return { total: subs.length, passed: passed.length, avg, ects, graded: graded.length };
+  const all = calc(passed), idx = calc(passed.filter(s => !s.notInIndex));
+  return { total: subs.length, ...all, official: passed.some(s => s.notInIndex) ? idx : null };
 }
 function currentSem() { const sems = state.subjects.filter(s => s.sem && (s.status === 'tijek' || s.status === 'ceka')).map(s => s.sem); return sems.length ? Math.max(...sems) : 3; }
 function taskRow(t, showSubj) {
@@ -3188,9 +3241,10 @@ function renderFaks(segHtml) {
     const curSubs = state.subjects.filter(s => s.sem === cs);
     body = `<div class="card fk-hero">
         <div class="kicker">${esc(STUDY.school)} · ${esc(STUDY.name)}</div>
-        <div class="fk-big">${st.passed}<span>/${st.total} položeno</span></div>
-        <div class="progress"><span style="width:${pct}%;background:var(--orange)"></span></div>
-        <div class="fk-stats"><div><i>Prosjek</i><b>${st.avg ? st.avg.toFixed(2).replace('.', ',') : '–'}</b></div><div><i>ECTS</i><b>${st.ects ? st.ects + '/' + STUDY.ects : '–'}</b></div><div><i>Sada</i><b>${cs}. sem.</b></div></div>
+        <div class="fk-big">${st.passed}<span>/${st.total} kolegija položeno · ${cs}. sem.</span></div>
+        <div class="progress"><span style="width:${Math.min(100, Math.round(st.ects / STUDY.ects * 100))}%;background:var(--orange)"></span></div>
+        <div class="fk-stats"><div><i>ECTS</i><b>${st.ects}/${STUDY.ects}</b></div><div><i>Prosjek</i><b>${st.avg ? st.avg.toFixed(2).replace('.', ',') : '–'}</b></div><div><i>Težinski</i><b>${st.wavg ? st.wavg.toFixed(3).replace('.', ',') : '–'}</b></div></div>
+        ${st.official ? `<div class="fk-off">U e-indeksu (bez ocjena koje čekaju upis): ${st.official.ects} ECTS · prosjek ${st.official.avg ? st.official.avg.toFixed(2).replace('.', ',') : '–'} · težinski ${st.official.wavg ? st.official.wavg.toFixed(3).replace('.', ',') : '–'}</div>` : ''}
       </div>
       <div class="sec-head"><span class="section-title">Nadolazeći rokovi</span><button class="link-btn" id="fkAll">Svi →</button></div>
       <div class="card tight">${open.length ? open.slice(0, 6).map(t => taskRow(t, true)).join('') : `<div class="empty">Nema otvorenih zadataka. 🎉</div>`}</div>
@@ -3256,9 +3310,10 @@ function renderSubject() {
   const maxSum = ptsTasks.reduce((a, t) => a + (+t.max || 0), 0) + s.points.reduce((a, p) => a + (+p.max || 0), 0);
   view.innerHTML = `
     <div class="card fk-info">
-      <div class="fk-irow">${s.prof ? `<span>👤 ${esc(s.prof)}</span>` : ''}${s.ects ? `<span>${s.ects} ECTS</span>` : ''}${s.nastava ? `<span>📅 nastava ${esc(s.nastava)}</span>` : ''}${!s.prof && !s.ects && !s.nastava ? '<span class="note" style="margin:0">Profesor, ECTS i nastava – dodaj na ✎</span>' : ''}</div>
+      <div class="fk-irow">${s.prof ? `<span>👤 ${esc(s.prof)}</span>` : ''}${s.passedDate && s.status === 'polozen' ? `<span>✓ ${shortDate(s.passedDate)} ${s.passedDate.slice(0, 4)}.</span>` : ''}${s.ects ? `<span>${s.ects} ECTS</span>` : ''}${s.nastava ? `<span>📅 nastava ${esc(s.nastava)}</span>` : ''}${!s.prof && !s.ects && !s.nastava ? '<span class="note" style="margin:0">Profesor, ECTS i nastava – dodaj na ✎</span>' : ''}</div>
       <div class="chips" id="sjStat" style="margin-top:10px">${SUBJ_STATUS.map(([k, n, c]) => `<button class="chip ${s.status === k ? 'on' : ''}" data-st="${k}" ${s.status === k ? `style="background:${c};border-color:${c};color:#fff"` : ''}>${n}</button>`).join('')}</div>
-      ${s.status === 'polozen' ? `<div class="fk-grade"><span>Ocjena</span>${[1, 2, 3, 4, 5].map(g => `<button data-gr="${g}" class="${s.grade === g ? 'on' : ''}">${g}</button>`).join('')}</div>` : ''}
+      ${s.status === 'polozen' ? `<div class="fk-grade"><span>Ocjena</span>${[1, 2, 3, 4, 5].map(g => `<button data-gr="${g}" class="${s.grade === g ? 'on' : ''}">${g}</button>`).join('')}</div>
+        <div class="fk-pdate"><label>Datum polaganja <input type="date" id="sjDate" value="${s.passedDate || ''}"></label><label class="fk-ix"><input type="checkbox" id="sjIdx" ${s.notInIndex ? '' : 'checked'}> upisano u indeks</label></div>` : ''}
     </div>
     <div class="sec-head"><span class="section-title">Zadaci i rokovi</span><button class="link-btn" id="addTask">+ Dodaj</button></div>
     <div class="card tight">${openT.length ? openT.map(t => taskRow(t)).join('') : `<div class="empty">Nema otvorenih zadataka.</div>`}
@@ -3276,6 +3331,8 @@ function renderSubject() {
     <div class="card"><textarea class="notes-area" id="notes" placeholder="Gradivo, što trebam ponoviti, dojmovi s predavanja…">${esc(s.notes || '')}</textarea></div>`;
   document.getElementById('sjStat').onclick = ev => { const b = ev.target.closest('[data-st]'); if (!b) return; s.status = b.dataset.st; save(); render(); if (s.status === 'polozen') toast('🎉 Bravo! Upiši ocjenu.'); };
   view.querySelectorAll('[data-gr]').forEach(b => b.onclick = () => { s.grade = +b.dataset.gr; save(); render(); });
+  const sjd = document.getElementById('sjDate'); if (sjd) sjd.onchange = () => { s.passedDate = sjd.value || null; save(); toast('Spremljeno'); };
+  const sji = document.getElementById('sjIdx'); if (sji) sji.onchange = () => { s.notInIndex = !sji.checked; save(); render(); };
   document.getElementById('addTask').onclick = () => openTaskSheet(null, s.id);
   view.querySelectorAll('[data-task]').forEach(b => b.onclick = () => { const t = state.faksTasks.find(x => x.id === b.dataset.task); if (t) openTaskSheet(t); });
   document.getElementById('addPts').onclick = () => openPointSheet(s);
@@ -3362,7 +3419,7 @@ function openSubjectSheet(existing, presetSem) {
   const semOpts = `<option value="">— bez semestra —</option>` + [1, 2, 3, 4, 5, 6].map(n => `<option value="${n}" ${(e.sem || presetSem) === n ? 'selected' : ''}>${Math.ceil(n / 2)}. godina · ${semName(n)}</option>`).join('');
   openSheet(existing ? 'Uredi kolegij' : 'Novi kolegij', `
     <div class="field"><label>Naziv kolegija</label><input id="f-name" value="${esc(e.name || '')}" placeholder="npr. Strukture podataka i algoritmi" autocomplete="off"></div>
-    <div class="field"><label>Profesor</label><input id="f-prof" value="${esc(e.prof || '')}" placeholder="npr. prof. Cerinski" autocomplete="off"></div>
+    <div class="field"><label>Nastavnici</label><input id="f-prof" value="${esc(e.prof || '')}" placeholder="npr. prof. Cerinski" autocomplete="off"></div>
     <div class="field"><label>Godina i semestar</label><select id="f-sem">${semOpts}</select></div>
     <div class="row2"><div class="field"><label>ECTS</label><input id="f-ects" inputmode="numeric" value="${e.ects || ''}" placeholder="npr. 6"></div><div class="field"><label>Nastava (termin)</label><input id="f-nast" value="${esc(e.nastava || '')}" placeholder="npr. 7.–19. 12." autocomplete="off"></div></div>
     <div class="field"><label>Boja</label>${swatches(color)}</div>
@@ -3988,7 +4045,7 @@ function setTheme(t) {
 }
 setTheme(document.documentElement.dataset.theme || 'light');
 
-try { const had = !!state.faksSeeded; faksMigrate(state); if (!had) save(); } catch (e) { console.error('faks migrate', e); }
+try { const had = !!(state.faksSeeded && state.faksV2); faksMigrate(state); faksMigrateV2(state); if (!had) save(); } catch (e) { console.error('faks migrate', e); }
 render();
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
