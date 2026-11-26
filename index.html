@@ -447,6 +447,10 @@
 .ch-saved{text-align:right}.ch-saved i{display:block;font-style:normal;font-size:11px;color:var(--muted)}.ch-saved b{font-family:'Space Mono',monospace;color:var(--green)}
 .ch-dots{display:flex;flex-wrap:wrap;gap:4px}.ch-dots i{width:12px;height:12px;border:1px solid var(--ink);opacity:.35}
 .ch-dots i.ok{background:var(--green);border-color:var(--green);opacity:1}.ch-dots i.slip{background:var(--orange);border-color:var(--orange);opacity:1}.ch-dots i.miss{opacity:.15}.ch-dots i.now{opacity:1;border-width:2px}
+.ch-dots i[data-chd]:not([data-chd=""]){cursor:pointer}
+.ch-yest{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;padding:8px 10px;background:rgba(18,128,92,.08);font-size:13px}
+.ch-yest span{flex:1 1 100%;font-weight:600}.ch-yest button{padding:8px 10px;border:1.5px solid var(--ink);background:none;color:inherit;font-size:13px;font-weight:600}
+.ch-yest button:first-of-type{background:var(--green);border-color:var(--green);color:#fff}
 .ch-actions{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin-top:12px}
 .ch-actions button{padding:12px 8px;border:1.5px solid var(--ink);background:none;color:inherit;font-weight:700;font-size:14px}
 .ch-actions button:first-child{background:var(--ink);color:var(--bg)}
@@ -2171,13 +2175,15 @@ function challengeHtml() {
   }
   const t = todayStr(), idx = chDayIdx(c, t), todayLog = c.log[t], streak = chStreak(c);
   const okCount = Object.values(c.log).filter(v => v === 'ok').length;
-  const dots = Array.from({ length: c.days }, (_, i) => { const d = addDays(c.start, i), v = c.log[d]; return `<i class="${v === 'ok' ? 'ok' : v === 'slip' ? 'slip' : d < t ? 'miss' : d === t ? 'now' : ''}"></i>`; }).join('');
+  const dots = Array.from({ length: c.days }, (_, i) => { const d = addDays(c.start, i), v = c.log[d]; return `<i data-chd="${d <= t ? d : ''}" class="${v === 'ok' ? 'ok' : v === 'slip' ? 'slip' : d < t ? 'miss' : d === t ? 'now' : ''}"></i>`; }).join('');
+  const yd = addDays(t, -1), yMissing = yd >= c.start && !c.log[yd];
   const risky = chTodayRisky();
   return `<div class="card ch-card" id="chCard">
     <div class="ch-top"><span class="kicker">No-buy izazov · dan ${Math.min(idx + 1, c.days)}/${c.days}</span><button class="link-btn" id="chMore">⋯</button></div>
     <div class="ch-mid"><div class="ch-streak">🔥 ${streak}<span>${plural(streak, 'dan', 'dana', 'dana')} zaredom</span></div>
       ${c.resisted ? `<div class="ch-saved"><i>Odoljela si</i><b>${money(c.resisted)}</b></div>` : ''}</div>
     <div class="ch-dots">${dots}</div>
+    ${yMissing ? `<div class="ch-yest"><span>Jučer (${shortDate(yd)}) nije označen</span><button id="chYOk">✓ Jučer samo nužno</button><button id="chYSlip">Kupila sam</button></div>` : `<div class="note" style="margin:6px 0 0;font-size:11px">Tapni kvadratić da promijeniš neki prošli dan.</div>`}
     ${risky.length && !todayLog ? `<div class="note" style="margin:8px 0 0">Danas imaš trošak u kategoriji ${esc(txCat(risky[0].cat).name)} (${money(risky.reduce((a, x) => a + x.amount, 0))}). Je li bio nužan? Budi iskrena sa sobom 🙂</div>` : ''}
     ${todayLog ? `<div class="ch-done ${todayLog}">${todayLog === 'ok' ? '✓ Danas samo nužno. Bravo!' : 'Danas je bio „slip”. Sutra je novi dan – ne odustaj.'} <button class="link-btn" id="chUndo">promijeni</button></div>`
       : `<div class="ch-actions"><button id="chOk">✓ Danas samo nužno</button><button id="chSlip">Kupila sam nešto</button></div>`}
@@ -2192,6 +2198,17 @@ function bindChallenge() {
   const ok = document.getElementById('chOk'); if (ok) ok.onclick = () => { c.log[t] = 'ok'; save(); if (!fin()) { render(); toast(['🔥 Još jedan dan!', '💪 Tako se to radi', '✨ Novčanik ti zahvaljuje'][chStreak(c) % 3]); } };
   const sl = document.getElementById('chSlip'); if (sl) sl.onclick = () => openChallengeSlip(c);
   const un = document.getElementById('chUndo'); if (un) un.onclick = () => { delete c.log[t]; save(); render(); };
+  const yd = addDays(t, -1);
+  const yo = document.getElementById('chYOk'); if (yo) yo.onclick = () => { c.log[yd] = 'ok'; save(); render(); toast('🔥 Jučer označen'); };
+  const ys = document.getElementById('chYSlip'); if (ys) ys.onclick = () => { c.log[yd] = 'slip'; save(); render(); };
+  document.querySelectorAll('#chCard [data-chd]').forEach(el => { if (!el.dataset.chd) return; el.onclick = () => {
+    const d = el.dataset.chd, v = c.log[d];
+    openSheet(`${d === t ? 'Danas' : shortDate(d)}`, `<div class="note" style="margin:0 0 12px">Trenutno: <b style="color:var(--ink)">${v === 'ok' ? 'samo nužno' : v === 'slip' ? 'kupila nešto' : 'nije označeno'}</b></div>
+      <button class="btn" id="d-ok">✓ Samo nužno</button><button class="btn ghost" id="d-slip">Kupila sam nešto</button>${v ? '<button class="btn danger" id="d-clr">Makni oznaku</button>' : ''}`);
+    document.getElementById('d-ok').onclick = () => { c.log[d] = 'ok'; save(); closeSheet(); render(); };
+    document.getElementById('d-slip').onclick = () => { c.log[d] = 'slip'; save(); closeSheet(); render(); };
+    const cl = document.getElementById('d-clr'); if (cl) cl.onclick = () => { delete c.log[d]; save(); closeSheet(); render(); };
+  }; });
   document.getElementById('chUrge').onclick = () => openUrgeSheet(c);
   document.getElementById('chMore').onclick = () => { openSheet('No-buy izazov', `
     <div class="note" style="margin:0 0 12px">${CH_RULES}</div>
